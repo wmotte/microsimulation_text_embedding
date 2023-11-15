@@ -14,6 +14,14 @@ library( 'ggplot2' )
 ##################################### Functions ###########################################
 
 ###
+# Random sample from Bernoulli distribution
+##
+rbernoulli <- function( n, p = 0.5 ) 
+{
+    return( stats::runif( n ) > ( 1 - p ) )
+}
+
+###
 # Number of ticks
 ##
 number_ticks <- function( n )
@@ -196,8 +204,8 @@ dir.create( outdir, showWarnings = FALSE )
 general_transition_matrix <- get_general_transition_matrix()
 
 # Model input
-n.i   <- 1500                  # number of simulated individuals
-n.t   <- 250                   # time horizon in cycles
+n.i   <- 5000                  # number of simulated individuals
+n.t   <- 75                    # time horizon in cycles
 v.n   <- paste0( "H", 1:nrow( general_transition_matrix ) )    # model state names
 v.M_1 <- rep( "H1", n.i )      # everyone begins in the healthy state 
 
@@ -225,6 +233,8 @@ readr::write_csv( sdata, file = gzfile( paste0( outdir, '/network_flow.csv.gz' )
 # plot
 p <- ggplot( data = sdata, aes( x = as.numeric( time ), y = value * 100, group = variable, colour = variable ) ) + 
     geom_line() + facet_wrap( ~variable, ncol = 2, scales = 'free' ) + theme_custom() + 
+    scale_x_continuous( breaks = number_ticks( 6 ) ) +
+    scale_y_continuous( breaks = number_ticks( 3 ) ) +
     xlab( 'time' ) + ylab( '%' ) + theme( legend.position = 'none' )
 
 # save to disk
@@ -234,11 +244,112 @@ ggsave( plot = p, dpi = 300, height = 8, width = 8, file = paste0( outdir, '/net
 
 ### sample products ###
 
+# <n_subjects> x 251
+dim( mat <- df$m.M )
 
+# probability of product taking
+prob <- 0.10
 
+# string container
+all <- NULL
 
+i <- 1
 
+# loop over subjects
+for( i in 1:nrow( mat ) )
+{
+    # get subject route
+    vsub <- mat[ i, ]
+    
+    # get product taken
+    vproducts <- vsub[ rbernoulli( length( vsub ), p = prob ) ]
+    
+    # identify lagging states (up to 3 positions)
+    idx1 <- vproducts == dplyr::lag( vproducts, 1 )
+    idx2 <- vproducts == dplyr::lag( vproducts, 2 )
+    idx3 <- vproducts == dplyr::lag( vproducts, 3 )    
+    
+    # set first NA to false (due to lag function)
+    idx1[ 1 ] <- FALSE
+    
+    idx2[ 1 ] <- FALSE
+    idx2[ 2 ] <- FALSE
+    
+    idx3[ 1 ] <- FALSE
+    idx3[ 2 ] <- FALSE
+    idx3[ 3 ] <- FALSE
+    
+    # get negation
+    idx <- ( idx1 + idx2 + idx3 ) == 0
 
+    # remove direct following duplicates, up to 3
+    vchain <- vproducts[ idx ]
 
+    # convert text to products
+    vchain[ vchain %in% 'H1' ] <- 'Apples'
+    vchain[ vchain %in% 'H2' ] <- 'Bananas'
+    vchain[ vchain %in% 'H3' ] <- 'Grapes'
+    vchain[ vchain %in% 'H4' ] <- 'Mangoes'
+    vchain[ vchain %in% 'H5' ] <- 'Oranges'
+    vchain[ vchain %in% 'H6' ] <- 'Pineapples'  
+    vchain[ vchain %in% 'H7' ] <- 'Strawberries'
+    vchain[ vchain %in% 'H8' ] <- 'Watermelons'
+    vchain[ vchain %in% 'H9' ] <- 'Broccoli'
+    vchain[ vchain %in% 'H10' ] <- 'Carrots'
+    vchain[ vchain %in% 'H11' ] <- 'Cauliflower'
+    vchain[ vchain %in% 'H12' ] <- 'Cucumbers'
+    vchain[ vchain %in% 'H13' ] <- 'Green beans'
+    vchain[ vchain %in% 'H14' ] <- 'Spinach'
+    vchain[ vchain %in% 'H15' ] <- 'Tomatoes'
+    vchain[ vchain %in% 'H16' ] <- 'Peppers'
+    vchain[ vchain %in% 'H17' ] <- 'Zucchini'
+    vchain[ vchain %in% 'H18' ] <- 'Apple_Juice'
+    vchain[ vchain %in% 'H19' ] <- 'Beer'
+    vchain[ vchain %in% 'H20' ] <- 'Bitter_Lemon'
+    vchain[ vchain %in% 'H21' ] <- 'Buttermilk'
+    vchain[ vchain %in% 'H22' ] <- 'Cassis'
+    vchain[ vchain %in% 'H23' ] <- 'Coffee'
+    vchain[ vchain %in% 'H24' ] <- 'Cola'
+    vchain[ vchain %in% 'H25' ] <- 'Energy_drink'
+    vchain[ vchain %in% 'H26' ] <- 'Ginger_ale'
+    vchain[ vchain %in% 'H27' ] <- 'Grape_Soda'
+    vchain[ vchain %in% 'H28' ] <- 'Iced_Tea'
+    vchain[ vchain %in% 'H29' ] <- 'Lemon_Lime'
+    vchain[ vchain %in% 'H30' ] <- 'Lemonade'
+    vchain[ vchain %in% 'H31' ] <- 'Milk'
+    vchain[ vchain %in% 'H32' ] <- 'Orange_Juice'
+    vchain[ vchain %in% 'H33' ] <- 'Radler'
+    vchain[ vchain %in% 'H34' ] <- 'Sodawater'
+    vchain[ vchain %in% 'H35' ] <- 'Tea'
+    vchain[ vchain %in% 'H36' ] <- 'Potato_Chips'
+    vchain[ vchain %in% 'H37' ] <- 'Sweets'
+    vchain[ vchain %in% 'H38' ] <- 'Snacks'
+    vchain[ vchain %in% 'H39' ] <- 'Chewing_Gum'
+    vchain[ vchain %in% 'H40' ] <- 'Shopping_Bag'
 
+    # collapse
+    vsubject <- paste( vchain, collapse = " " )
+    
+    all <- rbind( all, vsubject )
+}
+
+# remove sentences with less than 3 words
+nwords <- stringr::str_count( all, ' ' ) + 1
+
+all <- all[ nwords > 2 ]
+
+# get summary
+nwords <- stringr::str_count( all, ' ' ) + 1
+summary( nwords )
+
+# plot density
+p_sen <- 
+    ggplot( data = data.frame( x = nwords ), aes( x = x ) ) + 
+    geom_histogram( colour = 'gray30', bins = max( nwords ) - 2, fill = 'orange' ) + theme_custom() + 
+    scale_x_continuous( breaks = number_ticks( max( nwords ) - 4 ) ) +
+    scale_y_continuous( breaks = number_ticks( 10 ) ) +
+    xlab( 'Total words in sentence (N)' ) + ylab( 'Number of sentences' ) + theme( legend.position = 'none' )
+
+# save to disk
+ggsave( plot = p_sen, dpi = 300, height = 8, width = 8, file = paste0( outdir, '/sentence_length.png' ) )
 
