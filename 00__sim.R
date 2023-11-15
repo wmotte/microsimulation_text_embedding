@@ -204,7 +204,7 @@ dir.create( outdir, showWarnings = FALSE )
 general_transition_matrix <- get_general_transition_matrix()
 
 # Model input
-n.i   <- 5000                  # number of simulated individuals
+n.i   <- 10500                 # number of simulated individuals
 n.t   <- 75                    # time horizon in cycles
 v.n   <- paste0( "H", 1:nrow( general_transition_matrix ) )    # model state names
 v.M_1 <- rep( "H1", n.i )      # everyone begins in the healthy state 
@@ -241,8 +241,9 @@ p <- ggplot( data = sdata, aes( x = as.numeric( time ), y = value * 100, group =
 ggsave( plot = p, dpi = 300, height = 8, width = 8, file = paste0( outdir, '/network_flow.png' ) )
 
 
-
+#######################
 ### sample products ###
+#######################
 
 # <n_subjects> x 251
 dim( mat <- df$m.M )
@@ -335,8 +336,10 @@ for( i in 1:nrow( mat ) )
 
 # remove sentences with less than 3 words
 nwords <- stringr::str_count( all, ' ' ) + 1
-
 all <- all[ nwords > 2 ]
+
+# chop to 10k
+all <- all[ 1:10000 ]
 
 # get summary
 nwords <- stringr::str_count( all, ' ' ) + 1
@@ -352,4 +355,8 @@ p_sen <-
 
 # save to disk
 ggsave( plot = p_sen, dpi = 300, height = 8, width = 8, file = paste0( outdir, '/sentence_length.png' ) )
+
+# write to plain text file
+readr::write_lines( all, file = paste0( outdir, '/plain_text.txt' ) )
+
 
