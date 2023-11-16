@@ -1,7 +1,9 @@
+#!/usr/bin/env Rscript
+#
 # https://text2vec.org/glove.html
-
+#
 # https://medium.com/cmotions/nlp-with-r-part-2-training-word-embedding-models-and-visualize-results-ae444043e234
-
+#
 library( "text2vec" )
 
 # input data

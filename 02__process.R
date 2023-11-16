@@ -5,10 +5,64 @@
 ################################################################################
 library( "umap" )
 library( "ggplot2" )
+library( "ggrepel" )
 
 ################################################################################
 # FUNCTIONS
 ################################################################################
+
+###
+# Custom theme
+##
+theme_custom <- function( base_size = 16, base_family = "", 
+                          base_line_size = base_size / 22, 
+                          base_rect_size = base_size / 22 ) 
+{
+    theme_bw( base_size = base_size, base_family = base_family, 
+              base_line_size = base_line_size, 
+              base_rect_size = base_rect_size ) %+replace% 
+        theme( legend.position = "top",
+               axis.ticks = element_blank(), 
+               legend.background = element_blank(), 
+               legend.key = element_blank(), 
+               panel.border = element_blank(), 
+               strip.background = element_blank(),
+               strip.text.x = element_text( face = "bold" ), 
+               strip.text.y = element_text( face = "bold" ),
+               complete = TRUE )
+}
+
+###
+# Number of ticks
+##
+number_ticks <- function( n )
+{
+    function( limits )
+        pretty( limits, n + 1 )
+}
+
+###
+# Get section (i.e., groups)
+##
+get_sections <- function()
+{
+    # get group d.f.
+    sections <- rbind(
+        data.frame( label = c('Apples', 'Bananas', 'Grapefruit', 'Grapes', 'Kiwi', 'Lime', 'Mangoes', 
+                              'Oranges', 'Pineapples', 'Strawberries', 'Watermelons' ), section = 'fruits' ),
+        
+        data.frame( label = c( 'Cauliflower', 'Cucumbers', 'Eggplant', 'Onion', 'Spinach', 
+                               'Tomatoes', 'Peppers', 'Zucchini' ), section = 'vegetables' ),
+        
+        data.frame( label = c( 'BitterLemon', 'Cassis', 'Coffee', 'Cola', 'Lemonade', 
+                               'Sodawater', 'Tea' ), section = 'beverages' ),
+        
+        data.frame( label = c( 'CaramelBars', 'ChewingGum', 'ChocolateBar', 'Crackers', 'GummyBears', 
+                               'MixedNuts', 'Popcorn', 'PotatoChips', 'Snickers', 'Sweets', 'Snacks', 
+                               'Twix', 'Pringles', 'ShoppingBag' ), section = 'extras' ) )
+    
+    return( sections )
+}
 
 ###
 # Get top-10 neighbors
@@ -67,65 +121,87 @@ nn <- calculate_neighbors( embedding )
 # write to file
 readr::write_csv( nn, file = paste0( outdir, '/nearest_neighbors.csv' ), quote = 'all' )
 
+# loop over types
+type <- 'I'
 
+for( type in c( 'I', 'II', 'III' ) )
+{
+    identifier <- paste0( "_", type, "$" )
+    
+    # only select products 'I' (i.e., 40 x 50 matrix)
+    embedding_small <- embedding[ grep( identifier, rownames( embedding ) ), ]
+    
+    # clean names from suffix
+    rownames( embedding_small ) <- gsub( identifier, "", rownames( embedding_small ) )
 
-# only select products 'I' (i.e., 40 x 50 matrix)
-embedding_small <- embedding[ grep( "_I$", rownames( embedding ) ), ]
-
-# clean names from suffix
-rownames( embedding_small ) <- gsub( "_I$", "", rownames( embedding_small ) )
-
-#######################
-
-# glove dimension reduction
-glove_umap <- umap( embedding_small, n_components = 2, spread = 1 )
+    # dimension reduction
+    glove_umap <- umap( embedding_small, n_components = 2, metric = 'cosine', min_dist = 0.2 )
                     #n_components = 2, metric = "cosine", 
                     #n_neighbors = 5, min_dist = 0.1, spread = 15 )
 
-# dimensions of end result [40 x 2]
-dim( glove_umap$layout )
+    # do the same for the GloVe embeddings
+    df <- as.data.frame( glove_umap$layout, stringsAsFactors = FALSE )
 
-# do the same for the GloVe embeddings
-df_glove_umap <- as.data.frame( glove_umap$layout, stringsAsFactors = FALSE )
+    # Add the labels of the words to the data frame
+    df$label <- rownames( embedding_small )
+    colnames( df ) <- c( "UMAP1", "UMAP2", "label" )
+    
+    # merge with sections (groups)
+    df <- merge( df, get_sections() )
+    
+    df$label <- as.factor( df$label )
+    df$section <- as.factor( df$section )
 
-# Add the labels of the words to the dataframe
-df_glove_umap$word <- rownames( embedding_small )
-colnames( df_glove_umap ) <- c( "UMAP1", "UMAP2", "word" )
-
-
-
-# Plot the UMAP dimensions for both Word2Vec and GloVe
-#ggplot( df_glove_umap ) +
-#    geom_label( aes( x = UMAP1, y = UMAP2, label = word ) ) +
-#        geom_point( aes( x = UMAP1, y = UMAP2 ), colour = 'blue', size = 2, alpha = 0.6 ) 
-
-
-set.seed(42)
-
-
-p + geom_label_repel(aes(label = rownames(df),
-                         fill = factor(cyl)), color = 'white',
-                     size = 3.5) +
-    theme(legend.position = "bottom")
-
-
-    #facet_wrap(~technique) +
-    #labs(title = "Word embedding in 2D using UMAP") +
-    #theme(plot.title = element_text(hjust = .5, size = 14))
-
-library( "ggrepel" )
-
-
-df_glove_umap$group <- 'Vegetable'
-
-p <- 
-    ggplot( df_glove_umap, aes( x = UMAP1, y = UMAP2 ) ) +
-       geom_point( color = 'red' ) +
-       geom_label_repel( aes( label = word, fill = group ), color = 'white', segment.colour="gray30", size = 3.5 ) +
-       theme( legend.position = "top" )
-
-head( df )
-
-head( df_glove_umap )
+    # get map
+    p <- ggplot( df, aes( x = UMAP1, y = UMAP2 ) ) +
+         geom_point( aes( fill = section ), shape = 21, colour = 'gray30', size = 3 ) +
+         geom_label_repel( aes( label = label, fill = section ), color = 'white', segment.colour="gray30", size = 2.5, alpha = 0.8 ) +
+         xlab( 'dimension I' ) +
+         ylab( 'dimension II' ) +
+         scale_x_continuous( breaks = number_ticks( 6 ) ) +
+         scale_y_continuous( breaks = number_ticks( 6 ) ) +
+        
+         theme_bw( base_size = 12 ) %+replace% 
+         theme( legend.position = "top",
+               axis.ticks = element_blank(), 
+               legend.background = element_blank(), 
+               legend.key = element_blank(), 
+               panel.border = element_blank(), 
+               strip.background = element_blank(),
+               strip.text.x = element_text( face = "bold" ), 
+               strip.text.y = element_text( face = "bold" ),
+               complete = FALSE )
+    
+    # save to disk
+    ggsave( plot = p, dpi = 300, height = 7, width = 7, file = paste0( outdir, '/map_embedding_type_', type, '.png' ) )
+}
 
 
+sname <- 'average'
+
+# get max value to normalize matrix
+max_value <- max( abs( embedding_small ) )
+
+# sort
+#tmp <- as.data.frame( embedding_small )#$group <- 'piet'
+#tmp$group <- rownames( tmp )
+
+# save to disk
+ggsave( plot = p, dpi = 300, height = 7, width = 7, file = paste0( outdir, '/map_embedding_type_', type, '.png' ) )
+
+
+# normalize and transpose
+mat <- t( embedding_small / max_value )
+
+
+####### matrices #######
+
+library( "ggcorrplot" )
+
+
+
+p_cor <- ggcorrplot( mat, outline.col = "white", ggtheme = ggplot2::theme_gray,
+            colors = c("#6D9EC1", "white", "#E46726"), show.legend = FALSE, lab_size = 10 )
+
+# save to disk
+ggsave( plot = p_cor, dpi = 300, height = 11, width = 11, file = paste0( outdir, '/mat_', sname, '__type_', type, '.png' ) )

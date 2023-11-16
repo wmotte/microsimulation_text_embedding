@@ -264,7 +264,7 @@ place_products <- function( vchain )
         vchain[ vchain %in% paste0( 'H39', '_', type ) ] <- paste0( 'Pringles', '_', type )        
 
         # end of line
-        vchain[ vchain %in% paste0( 'H40', '_', type ) ] <- paste0( 'Shopping_Bag', '_', type )
+        vchain[ vchain %in% paste0( 'H40', '_', type ) ] <- paste0( 'ShoppingBag', '_', type )
     }
     
     return( vchain )
