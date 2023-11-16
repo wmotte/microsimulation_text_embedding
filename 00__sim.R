@@ -1,5 +1,9 @@
+#!/usr/bin/env Rscript
 #
-# This code forms the basis for the microsimulation model of the article: 
+# W.M. Otte (w.m.otte@umcutrecht.nl)
+#
+#
+# Microsimulation of a supermarket model with shopping visitors: 
 #
 # Krijkamp EM, Alarid-Escudero F, Enns EA, Jalal HJ, Hunink MGM, Pechlivanoglou P. 
 # Microsimulation modeling for health decision sciences using R: A tutorial. 
@@ -10,8 +14,9 @@
 
 library( 'ggplot2' )
 
-
-##################################### Functions ###########################################
+################################################################################
+##################################### Functions ################################
+################################################################################
 
 ###
 # Random sample from Bernoulli distribution
@@ -80,17 +85,6 @@ get_general_transition_matrix <- function()
     # plot it
     #plot( network, vertex.size = 8, vertex.label = NA )
     
-    
-    # TODO
-    #state_names <- paste0( "H", 1:5 )
-    
-    # transition table [all potential transitions in the model (i.e., all arrows, in this case 8 arrows]
-    #tmat <- rbind( c( NA,  1,  1,  1,  0 ),
-    #               c( -1, NA,  1,  0,  0 ),
-    #               c( -1, -1, NA,  1,  1 ),
-    #               c( -1, -1, -1, NA,  1 ),
-    #               c( NA, NA, NA, NA,  1 ) )
-    
     # relative contribution of weights
     p_backward <- 2 # lower triangle
     p_forward <- 10 # upper triangle
@@ -99,7 +93,6 @@ get_general_transition_matrix <- function()
     tmat[ lower.tri( tmat ) ] <- tmat[ lower.tri( tmat ) ] * p_backward 
     tmat[ upper.tri( tmat, diag = FALSE ) ] <- tmat[ upper.tri( tmat, diag = FALSE ) ] * p_forward
     diag( tmat ) <- p_diag
-    
     
     # normalize [row have to sum to 1!]
     correction_value <- 1 / rowSums( tmat, na.rm = TRUE ) 
@@ -113,24 +106,22 @@ get_general_transition_matrix <- function()
     return( pmat )
 }
 
-# The MicroSim function for the simple microsimulation of the 'Sick-Sicker' 
+# The MicroSim function for the microsimulation
 #
 # Arguments:  
+# general_transition_metrix: probabilities for state transitions
 # v.M_1:   vector of initial states for individuals 
 # n.i:     number of individuals
 # n.t:     total number of cycles to run the model
-# v.n:     vector of health state names
+# v.n:     vector of state names
 #
-# TR.out:  should the output include a microsimulation trace? (default is TRUE)
-# TS.out:  should the output include a matrix of transitions between states? (default is TRUE)
+# TR.out:  should the output include a microsimulation trace?
+# TS.out:  should the output include a matrix of transitions between states?
 # seed:    starting seed number for random number generator (default is 1)
 #
-# Makes use of:
-# Probs:   function for the estimation of transition probabilities
 ##
-MicroSim <- function( general_transition_matrix, v.M_1, n.i, n.t, v.n, TR.out = TRUE, TS.out = TRUE, seed = 1 )
+MicroSim <- function( general_transition_matrix, v.M_1, n.i, n.t, v.n, TR.out = TRUE, TS.out = FALSE, seed = 1 )
 {
-
     # create the matrix capturing the state name/costs/health outcomes for all individuals at each time point 
     m.M <- matrix( nrow = n.i, ncol = n.t + 1, 
                                   dimnames = list( paste( "ind", 1:n.i, sep = " " ), 
@@ -187,14 +178,104 @@ MicroSim <- function( general_transition_matrix, v.M_1, n.i, n.t, v.n, TR.out = 
     # store the results from the simulation in a list  
     results <- list( m.M = m.M, TS = TS, TR = TR ) 
     
-    return(results)
+    return( results )
     
 }  # end of the MicroSim function  
 
-##################################### Run the simulation ##################################
+###
+# Process data for plotting
+##
+process_plotting_data <- function( df )
+{
+    
+    # convert to long [Cycle x State x value]
+    data <- as.data.frame( df$TR )
+    data$time <- as.factor( 1:nrow( data ) )
+    rownames( data ) <- NULL
+    
+    # get long
+    data_long <- reshape2::melt( data, id.vars = 'time' )
+    data_long$time <- as.numeric( data_long$time )
+    
+    return( data_long )
+}
+
+###
+# Return random sets of 'I', 'II' or 'III'
+##
+get_product_version <- function( n )
+{
+    result <- sample( x = c( 'I', 'II', 'III' ), n, replace = TRUE )  
+    return( result )
+}
+
+###
+# Place random products (1,2 or 3)
+##
+place_products <- function( vchain )
+{
+    for( type in c( 'I', 'II', 'III' ) )
+    {
+        # convert text to products
+        vchain[ vchain %in% paste0( 'H1', '_', type ) ] <- paste0( 'Apples', '_', type )
+        vchain[ vchain %in% paste0( 'H2', '_', type ) ] <- paste0( 'Bananas', '_', type )
+        vchain[ vchain %in% paste0( 'H3', '_', type ) ] <- paste0( 'Grapefruit', '_', type )
+        vchain[ vchain %in% paste0( 'H4', '_', type ) ] <- paste0( 'Grapes', '_', type )
+        vchain[ vchain %in% paste0( 'H5', '_', type ) ] <- paste0( 'Kiwi', '_', type )
+        vchain[ vchain %in% paste0( 'H6', '_', type ) ] <- paste0( 'Lime', '_', type )
+        vchain[ vchain %in% paste0( 'H7', '_', type ) ] <- paste0( 'Mangoes', '_', type )
+        vchain[ vchain %in% paste0( 'H8', '_', type ) ] <- paste0( 'Oranges', '_', type )
+        vchain[ vchain %in% paste0( 'H9', '_', type ) ] <- paste0( 'Pineapples', '_', type )
+        vchain[ vchain %in% paste0( 'H10', '_', type ) ] <- paste0( 'Strawberries', '_', type )
+        vchain[ vchain %in% paste0( 'H11', '_', type ) ] <- paste0( 'Watermelons', '_', type )
+        
+        # vegetables
+        vchain[ vchain %in% paste0( 'H12', '_', type ) ] <- paste0( 'Cauliflower', '_', type )
+        vchain[ vchain %in% paste0( 'H13', '_', type ) ] <- paste0( 'Cucumbers', '_', type )
+        vchain[ vchain %in% paste0( 'H14', '_', type ) ] <- paste0( 'Eggplant', '_', type )
+        vchain[ vchain %in% paste0( 'H15', '_', type ) ] <- paste0( 'Onion', '_', type )
+        vchain[ vchain %in% paste0( 'H16', '_', type ) ] <- paste0( 'Spinach', '_', type )
+        vchain[ vchain %in% paste0( 'H17', '_', type ) ] <- paste0( 'Tomatoes', '_', type )
+        vchain[ vchain %in% paste0( 'H18', '_', type ) ] <- paste0( 'Peppers', '_', type )
+        vchain[ vchain %in% paste0( 'H19', '_', type ) ] <- paste0( 'Zucchini', '_', type )
+        
+        # beverages
+        vchain[ vchain %in% paste0( 'H20', '_', type ) ] <- paste0( 'BitterLemon', '_', type )
+        vchain[ vchain %in% paste0( 'H21', '_', type ) ] <- paste0( 'Cassis', '_', type )
+        vchain[ vchain %in% paste0( 'H22', '_', type ) ] <- paste0( 'Coffee', '_', type )
+        vchain[ vchain %in% paste0( 'H23', '_', type ) ] <- paste0( 'Cola', '_', type )
+        vchain[ vchain %in% paste0( 'H24', '_', type ) ] <- paste0( 'Lemonade', '_', type )
+        vchain[ vchain %in% paste0( 'H25', '_', type ) ] <- paste0( 'Sodawater', '_', type )
+        vchain[ vchain %in% paste0( 'H26', '_', type ) ] <- paste0( 'Tea', '_', type )
+        
+        # extras
+        vchain[ vchain %in% paste0( 'H27', '_', type ) ] <- paste0( 'CaramelBars', '_', type )
+        vchain[ vchain %in% paste0( 'H28', '_', type ) ] <- paste0( 'ChewingGum', '_', type )
+        vchain[ vchain %in% paste0( 'H29', '_', type ) ] <- paste0( 'ChocolateBar', '_', type )
+        vchain[ vchain %in% paste0( 'H30', '_', type ) ] <- paste0( 'Crackers', '_', type )
+        vchain[ vchain %in% paste0( 'H31', '_', type ) ] <- paste0( 'GummyBears', '_', type )
+        vchain[ vchain %in% paste0( 'H32', '_', type ) ] <- paste0( 'MixedNuts', '_', type )
+        vchain[ vchain %in% paste0( 'H33', '_', type ) ] <- paste0( 'Popcorn', '_', type )
+        vchain[ vchain %in% paste0( 'H34', '_', type ) ] <- paste0( 'PotatoChips', '_', type )
+        vchain[ vchain %in% paste0( 'H35', '_', type ) ] <- paste0( 'Snickers', '_', type )
+        vchain[ vchain %in% paste0( 'H36', '_', type ) ] <- paste0( 'Sweets', '_', type )
+        vchain[ vchain %in% paste0( 'H37', '_', type ) ] <- paste0( 'Snacks', '_', type )
+        vchain[ vchain %in% paste0( 'H38', '_', type ) ] <- paste0( 'Twix', '_', type )
+        vchain[ vchain %in% paste0( 'H39', '_', type ) ] <- paste0( 'Pringles', '_', type )        
+
+        # end of line
+        vchain[ vchain %in% paste0( 'H40', '_', type ) ] <- paste0( 'Shopping_Bag', '_', type )
+    }
+    
+    return( vchain )
+}
+
+################################################################################
+############################## End of functions ################################
+################################################################################
 
 # set seed
-set.seed( 123 )
+set.seed( 4321 )
 
 # output
 outdir <- 'out.00.sim'
@@ -204,7 +285,7 @@ dir.create( outdir, showWarnings = FALSE )
 general_transition_matrix <- get_general_transition_matrix()
 
 # Model input
-n.i   <- 52500                 # number of simulated individuals
+n.i   <- 105000                # number of simulated individuals
 n.t   <- 75                    # time horizon in cycles
 v.n   <- paste0( "H", 1:nrow( general_transition_matrix ) )    # model state names
 v.M_1 <- rep( "H1", n.i )      # everyone begins in the healthy state 
@@ -212,14 +293,8 @@ v.M_1 <- rep( "H1", n.i )      # everyone begins in the healthy state
 # get micro-simulations
 df <- MicroSim( general_transition_matrix, v.M_1, n.i, n.t, v.n ) # run for no treatment
 
-# convert to long [Cycle x State x value]
-data <- as.data.frame( df$TR )
-data$time <- as.factor( 1:nrow( data ) )
-rownames( data ) <- NULL
-
-# get long
-data_long <- reshape2::melt( data, id.vars = 'time' )
-data_long$time <- as.numeric( data_long$time )
+# selected long-format data
+data_long <- process_plotting_data( df )
 
 # select subset of network nodes to visualize
 selected_nodes <- c( "H1", paste0( "H", seq( 3, 40, 5 ) ), "H40" )
@@ -241,15 +316,19 @@ p <- ggplot( data = sdata, aes( x = as.numeric( time ), y = value * 100, group =
 ggsave( plot = p, dpi = 300, height = 8, width = 8, file = paste0( outdir, '/network_flow.png' ) )
 
 
-#######################
-### sample products ###
-#######################
+######################################
+######### sample products ############
+######################################
 
-# <n_subjects> x 251
+
+
+# three product versions per node
+
+# <n_subjects> x <n_cycles>
 dim( mat <- df$m.M )
 
 # probability of product taking
-prob <- 0.10
+prob <- 0.15
 
 # string container
 all <- NULL
@@ -265,100 +344,71 @@ for( i in 1:nrow( mat ) )
     # get product taken
     vproducts <- vsub[ rbernoulli( length( vsub ), p = prob ) ]
     
-    # identify lagging states (up to 3 positions)
-    idx1 <- vproducts == dplyr::lag( vproducts, 1 )
-    idx2 <- vproducts == dplyr::lag( vproducts, 2 )
-    idx3 <- vproducts == dplyr::lag( vproducts, 3 )    
+    # only continue if at least six products are available
+    if( length( vproducts ) > 5 )
+    {
+        # add type (I, II or III) to product
+        vvs <- get_product_version( length( vproducts ) )
+        vproducts <- paste0( vproducts, '_', vvs )
+        
+        # identify lagging states (up to 3 positions)
+        idx1 <- vproducts == dplyr::lag( vproducts, 1 )
+        idx2 <- vproducts == dplyr::lag( vproducts, 2 )
+        idx3 <- vproducts == dplyr::lag( vproducts, 3 )    
+        
+        # set first NA to false (due to lag function)
+        idx1[ 1 ] <- FALSE
+        
+        idx2[ 1 ] <- FALSE
+        idx2[ 2 ] <- FALSE
+        
+        idx3[ 1 ] <- FALSE
+        idx3[ 2 ] <- FALSE
+        idx3[ 3 ] <- FALSE
+        
+        # get negation
+        idx <- ( idx1 + idx2 + idx3 ) == 0
     
-    # set first NA to false (due to lag function)
-    idx1[ 1 ] <- FALSE
+        # remove direct following duplicates, up to 3
+        vchain <- vproducts[ idx ]
     
-    idx2[ 1 ] <- FALSE
-    idx2[ 2 ] <- FALSE
-    
-    idx3[ 1 ] <- FALSE
-    idx3[ 2 ] <- FALSE
-    idx3[ 3 ] <- FALSE
-    
-    # get negation
-    idx <- ( idx1 + idx2 + idx3 ) == 0
-
-    # remove direct following duplicates, up to 3
-    vchain <- vproducts[ idx ]
-
-    # convert text to products
-    vchain[ vchain %in% 'H1' ] <- 'Apples'
-    vchain[ vchain %in% 'H2' ] <- 'Bananas'
-    vchain[ vchain %in% 'H3' ] <- 'Grapes'
-    vchain[ vchain %in% 'H4' ] <- 'Mangoes'
-    vchain[ vchain %in% 'H5' ] <- 'Oranges'
-    vchain[ vchain %in% 'H6' ] <- 'Pineapples'  
-    vchain[ vchain %in% 'H7' ] <- 'Strawberries'
-    vchain[ vchain %in% 'H8' ] <- 'Watermelons'
-    vchain[ vchain %in% 'H9' ] <- 'Broccoli'
-    vchain[ vchain %in% 'H10' ] <- 'Carrots'
-    vchain[ vchain %in% 'H11' ] <- 'Cauliflower'
-    vchain[ vchain %in% 'H12' ] <- 'Cucumbers'
-    vchain[ vchain %in% 'H13' ] <- 'Green_Beans'
-    vchain[ vchain %in% 'H14' ] <- 'Spinach'
-    vchain[ vchain %in% 'H15' ] <- 'Tomatoes'
-    vchain[ vchain %in% 'H16' ] <- 'Peppers'
-    vchain[ vchain %in% 'H17' ] <- 'Zucchini'
-    vchain[ vchain %in% 'H18' ] <- 'Apple_Juice'
-    vchain[ vchain %in% 'H19' ] <- 'Beer'
-    vchain[ vchain %in% 'H20' ] <- 'Bitter_Lemon'
-    vchain[ vchain %in% 'H21' ] <- 'Buttermilk'
-    vchain[ vchain %in% 'H22' ] <- 'Cassis'
-    vchain[ vchain %in% 'H23' ] <- 'Coffee'
-    vchain[ vchain %in% 'H24' ] <- 'Cola'
-    vchain[ vchain %in% 'H25' ] <- 'Energy_drink'
-    vchain[ vchain %in% 'H26' ] <- 'Ginger_ale'
-    vchain[ vchain %in% 'H27' ] <- 'Grape_Soda'
-    vchain[ vchain %in% 'H28' ] <- 'Iced_Tea'
-    vchain[ vchain %in% 'H29' ] <- 'Lemon_Lime'
-    vchain[ vchain %in% 'H30' ] <- 'Lemonade'
-    vchain[ vchain %in% 'H31' ] <- 'Milk'
-    vchain[ vchain %in% 'H32' ] <- 'Orange_Juice'
-    vchain[ vchain %in% 'H33' ] <- 'Radler'
-    vchain[ vchain %in% 'H34' ] <- 'Sodawater'
-    vchain[ vchain %in% 'H35' ] <- 'Tea'
-    vchain[ vchain %in% 'H36' ] <- 'Potato_Chips'
-    vchain[ vchain %in% 'H37' ] <- 'Sweets'
-    vchain[ vchain %in% 'H38' ] <- 'Snacks'
-    vchain[ vchain %in% 'H39' ] <- 'Chewing_Gum'
-    vchain[ vchain %in% 'H40' ] <- 'Shopping_Bag'
-
-    # collapse
-    vsubject <- paste( vchain, collapse = " " )
-    
-    all <- rbind( all, vsubject )
+        # place random products [i.e., H1 -> Apples_I, Apples_II, Apples_III ]
+        vchain <- place_products( vchain )
+        
+        # collapse
+        vsubject <- paste( vchain, collapse = " " )
+        
+        all <- rbind( all, vsubject )
+    }
 }
 
-# remove sentences with less than 3 words
+# remove words < 5
 nwords <- stringr::str_count( all, ' ' ) + 1
-all <- all[ nwords > 2 ]
+tmp <- all[ nwords >= 5 ]
 
-# chop back to nice number of 10k
-all <- all[ 1:50000 ]
-
-all <- gsub( "NA", "", all )
+# select complete number 
+final_set <- tmp[ 1:100000 ]
 
 # get summary
-nwords <- stringr::str_count( all, ' ' ) + 1
+nwords <- stringr::str_count( final_set, ' ' ) + 1
+dim( final_set )
 summary( nwords )
 
 # plot density
 p_sen <- 
     ggplot( data = data.frame( x = nwords ), aes( x = x ) ) + 
-    geom_histogram( colour = 'gray30', bins = max( nwords ) - 2, fill = 'orange' ) + theme_custom() + 
+    geom_histogram( colour = 'gray30', bins = max( nwords ) - 4, fill = 'orange' ) + theme_custom() + 
     scale_x_continuous( breaks = number_ticks( max( nwords ) - 4 ) ) +
     scale_y_continuous( breaks = number_ticks( 10 ) ) +
-    xlab( 'Total words in sentence (N)' ) + ylab( 'Number of sentences' ) + theme( legend.position = 'none' )
+    xlab( 'Products in list (N)' ) + ylab( 'Number of lists' ) + theme( legend.position = 'none' )
 
 # save to disk
-ggsave( plot = p_sen, dpi = 300, height = 8, width = 8, file = paste0( outdir, '/sentence_length.png' ) )
+ggsave( plot = p_sen, dpi = 300, height = 8, width = 8, file = paste0( outdir, '/product_list_length.png' ) )
 
 # write to plain text file
-readr::write_lines( all, file = paste0( outdir, '/plain_text.txt' ) )
+readr::write_lines( final_set, file = gzfile( paste0( outdir, '/plain_text.txt.gz' ) ) )
 
-# TODO: make plot of word frequencies in dataset!
+
+
+
+

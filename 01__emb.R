@@ -4,86 +4,74 @@
 
 library( "text2vec" )
 library( "umap" )
+library( "ggplot2" )
 
+# input data
+df <- readr::read_lines( 'out.00.sim/plain_text.txt.gz' )
 
-# single line
-# wiki <- readLines( 'misc/text8', n = 1, warn = FALSE )
+# 491,185 words
+sum( stringr::str_count( df, ' ' ) + 1 )
 
+# input to GloVe is a single line, but we do not want word counts to influence at boundaries
+# therefore, we concat with a dummy term in between and add that to stop words
+list_separator <- paste0( " ", paste0( rep( "@", 10 ), collapse = ' ' ), " " )
 
-df <- readr::read_lines( 'out.00.sim/plain_text.txt' )
-
-# 17,005,207 words
-stringr::str_count( df, ' ' ) + 1
-
+# get single string
+single_df <- paste( df, collapse = list_separator )
 
 # Create iterator over tokens
-tokens <- space_tokenizer( df )
+tokens <- space_tokenizer( single_df )
 
 # Create vocabulary. Terms will be unigrams (simple words).
 it <- itoken( tokens, progressbar = TRUE )
-vocab <- create_vocabulary( it )
+vocab <- create_vocabulary( it, stopwords = c( "@" ) )
 
+# prune minimal
 vocab <- prune_vocabulary( vocab, term_count_min = 100 )
 
 # Use our filtered vocabulary
 vectorizer <- vocab_vectorizer( vocab )
 
-# use window of 5 for context words
-# term-co-occurence matrix (TCM).
-tcm <- create_tcm( it, vectorizer, skip_grams_window = 3 )
+# use window of n context words
+# term-co-occurrence matrix (TCM).
+tcm <- create_tcm( it, vectorizer, skip_grams_window = 10 )
 
-set.seed( 1 )
+set.seed( 444 )
 
-# glove
-#glove <- GlobalVectors$new( rank = 16, x_max = 1 )
+# 50 vector length (x_max = 10, iter = 100, tol = 0.0001, threads = 4)
+glove <- GlobalVectors$new( rank = 50, x_max = 100 )
+wv_main <- glove$fit_transform( tcm, n_iter = 50, convergence_tol = 0.0001, n_threads = 4 )
 
-
-library( 'rsparse' )
-
-glove_model <- NULL
-glove_model = GloVe$new( rank = 100, x_max = 1, learning_rate = 0.00000015, lambda = 0.01, shuffle = TRUE )
-embeddings = glove_model$fit_transform( tcm, n_iter = 10, n_threads = 4 )
-
-#this->vocab_size = as<size_t>(params["vocab_size"]);
-#this->word_vec_size = as<size_t>(params["word_vec_size"]);
-#this->x_max = as<uint32_t>(params["x_max"]);
-#this->learning_rate = as<T>(params["learning_rate"]);
-#this->alpha = as<T>(params["alpha"]);
-#this->lambda = as<T>(params["lambda"]);
-
-for( i in 10:100 )
-{
-    print( i )
-    # maximum number of co-occurrences to use in the weighting function, we choose the entire token set divided by 50 => 0.8 => 1
-    glove <- NULL
-    glove <- GlobalVectors$new( rank = i, x_max = 1 )
-    glove$initialize( rank = i, x_max = 1, learning_rate = 0.0000001, lambda = 0.00001, alpha = 1 )
-    wv_main <- glove$fit_transform( tcm, n_iter = 10, convergence_tol = -1, n_threads = 1 )
-    Sys.sleep( 5 )
-}
-
+# get context matrix
 wv_context <- glove$components
+
+# 50 x 120
 dim( wv_context )
 
-# combine main embedding and context embeddings (sum) into one matrix
-word_vectors <- wv_main + t( wv_context )
+# combine main embedding and context embedding (sum) into one matrix
+glove_embedding <- wv_main + t( wv_context )
 
 # container
 all <- NULL
 
-vnames <- rownames( as.data.frame( word_vectors ) )
+vnames <- rownames( as.data.frame( glove_embedding ) )
+vname <- vnames[ 1 ]
 
 for( vname in vnames )
 {
-
-    single <- word_vectors[ vname, , drop = FALSE ]
-    cos_sim = sim2( x = word_vectors, y = single, method = "cosine", norm = "l2" )
+    # get single word vector
+    single <- glove_embedding[ vname, , drop = FALSE ]
     
-    # get highest correspond (n=2)
-    corr <- sort( cos_sim[ , 1 ], decreasing = TRUE )[2:4]
-        
-    data <- data.frame( vname = vname, closest_corresponence = names( corr ) )
+    # pairwise similarities
+    cos_sim <- text2vec::sim2( x = glove_embedding, y = single, method = "cosine", norm = "l2" )
+    
+    # get highest correspond (n=5)
+    corr <- sort( cos_sim[ , 1 ], decreasing = TRUE )[ 2:6 ]
+    
+    # into d.f.
+    data <- data.frame( product = vname, closest_by = names( corr ), similarity = round( corr, 3 ) )
 
+    # merge into container
     all <- rbind( all, data )
     
 }
@@ -94,34 +82,33 @@ all
 
 #######################
 
+# glove dimension reduction
+glove_umap <- umap( glove_embedding, 
+                    n_components = 2, metric = "cosine", 
+                    n_neighbors = 5, min_dist = 0.1, spread = 20 )
 
+# dimensions of end result [120 x 2]
+dim( glove_umap$layout )
 
-glove_embedding <- word_vectors
-
-# GloVe dimension reduction
-glove_umap <- umap( word_vectors, n_components = 2, metric = "cosine", n_neighbors = 15, min_dist = 0.1, spread = 2 )
-
-# Dimensions of end result
-dim(glove_umap$layout)
-
-
-# Do the same for the GloVe embeddings
-df_glove_umap <- as.data.frame( glove_umap$layout, stringsAsFactors = FALSE)
+# do the same for the GloVe embeddings
+df_glove_umap <- as.data.frame( glove_umap$layout, stringsAsFactors = FALSE )
 
 # Add the labels of the words to the dataframe
 df_glove_umap$word <- rownames( glove_embedding )
-colnames(df_glove_umap) <- c("UMAP1", "UMAP2", "word")
+colnames( df_glove_umap ) <- c( "UMAP1", "UMAP2", "word" )
 df_glove_umap$technique <- 'GloVe'
-cat(paste0('\n', 'Our GloVe embedding reduced to 2 dimensions:', '\n'))
-str(df_glove_umap)
-ls()
+cat( paste0('\n', 'Our GloVe embedding reduced to 2 dimensions:', '\n') )
+str( df_glove_umap )
+
 df_umap <- df_glove_umap
 
-library( 'ggplot2' )
+
 # Plot the UMAP dimensions for both Word2Vec and GloVe
-ggplot(df_umap) +
-    geom_point( aes( x = UMAP1, y = UMAP2 ), colour = 'blue', size = 5) +
-    geom_label( aes( x = UMAP1, y = UMAP2, label = word ) )
+ggplot( df_umap ) +
+    geom_label( aes( x = UMAP1, y = UMAP2, label = word ) ) +
+        geom_point( aes( x = UMAP1, y = UMAP2 ), colour = 'blue', size = 5 ) 
++
+
     #facet_wrap(~technique) +
     #labs(title = "Word embedding in 2D using UMAP") +
     #theme(plot.title = element_text(hjust = .5, size = 14))
