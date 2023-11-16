@@ -204,7 +204,7 @@ dir.create( outdir, showWarnings = FALSE )
 general_transition_matrix <- get_general_transition_matrix()
 
 # Model input
-n.i   <- 10500                 # number of simulated individuals
+n.i   <- 52500                 # number of simulated individuals
 n.t   <- 75                    # time horizon in cycles
 v.n   <- paste0( "H", 1:nrow( general_transition_matrix ) )    # model state names
 v.M_1 <- rep( "H1", n.i )      # everyone begins in the healthy state 
@@ -299,7 +299,7 @@ for( i in 1:nrow( mat ) )
     vchain[ vchain %in% 'H10' ] <- 'Carrots'
     vchain[ vchain %in% 'H11' ] <- 'Cauliflower'
     vchain[ vchain %in% 'H12' ] <- 'Cucumbers'
-    vchain[ vchain %in% 'H13' ] <- 'Green beans'
+    vchain[ vchain %in% 'H13' ] <- 'Green_Beans'
     vchain[ vchain %in% 'H14' ] <- 'Spinach'
     vchain[ vchain %in% 'H15' ] <- 'Tomatoes'
     vchain[ vchain %in% 'H16' ] <- 'Peppers'
@@ -338,8 +338,10 @@ for( i in 1:nrow( mat ) )
 nwords <- stringr::str_count( all, ' ' ) + 1
 all <- all[ nwords > 2 ]
 
-# chop to 10k
-all <- all[ 1:10000 ]
+# chop back to nice number of 10k
+all <- all[ 1:50000 ]
+
+all <- gsub( "NA", "", all )
 
 # get summary
 nwords <- stringr::str_count( all, ' ' ) + 1
@@ -359,4 +361,4 @@ ggsave( plot = p_sen, dpi = 300, height = 8, width = 8, file = paste0( outdir, '
 # write to plain text file
 readr::write_lines( all, file = paste0( outdir, '/plain_text.txt' ) )
 
-
+# TODO: make plot of word frequencies in dataset!
