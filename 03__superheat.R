@@ -166,12 +166,39 @@ make_heatmap <- function( input_matrix, sname, outdir, order_cols )
     # order cols after clustering of main matrix
     mat <- mat[ , order_cols ]
     
+    # get similarity matrix
+    simil <- cosine_sim( t( mat ) )
+    
+    ###### PLOT 1 ####
+    
+    # save to disk
+    outfile <- paste0( outdir, '/', sname, '__similarity_matrix.png' )
+    png( outfile, height = 3200, width = 3200, res = 300 )
+    
+    # plot similarity matrix
+    superheat( simil, 
+              # place dendrograms on columns and rows 
+              row.dendrogram = F, col.dendrogram = F,
+              
+              # make gridlines white for enhanced prettiness
+              grid.hline.col = "gray30",
+              grid.vline.col = "gray30",
+              
+              # rotate bottom label text
+              bottom.label.text.angle = -90,
+              
+              left.label.text.size = 4,
+              bottom.label.text.size = 4,
+              legend = FALSE )
+    
+    dev.off()
+    
     # cosine-silhouette width
     #membership <- ss$section
     #names( membership ) <- ss$label
     #cs_width <- cosine_silhouette( mat, membership = as.factor( membership ) )$width   
 
-    ######## PLOT 1 #######
+    ######## PLOT 2 #######
         
     # save to disk
     outfile <- paste0( outdir, '/', sname, '__sections.png' )
@@ -203,7 +230,7 @@ make_heatmap <- function( input_matrix, sname, outdir, order_cols )
     dev.off()
     
     
-    ##### PLOT 2 ######
+    ##### PLOT 3 ######
     
     # save to disk
     outfile <- paste0( outdir, '/', sname, '__items.png' )
@@ -270,13 +297,5 @@ for( type in c( 'I', 'II', 'III' ) )
     make_heatmap( wv_context_small, paste0( 'wv_context_type_', type ), outdir, order_cols )
     make_heatmap( embedding_small, paste0( 'wv_embedding_type_', type ), outdir, order_cols )
     
-    # similarity matrix TODO
-    sim <- CosineSim( t( embedding_small ) )
-
-    
-    
-    
 }
-
-
 
