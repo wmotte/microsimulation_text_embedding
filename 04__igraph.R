@@ -63,11 +63,11 @@ plot_supermarket <- function( outdir )
     l[ 12, ] <- c( -50, -26.36 )
     l[ 13, ] <- c( -48.2, -31.8 )
     
-    # colors
-    V( g )$color <- c( rep( '#56bcc3', 11 ), 
-                       rep( '#bd81f9', 8 ), 
-                       rep( '#e07b71', 7 ),
-                       rep( '#87ac34', 14 )  )
+    # colors similar to umap decomposition
+    V( g )$color <- c( rep( '#a6d96a', 11 ), 
+                       rep( '#d9ef8b', 8 ), 
+                       rep( '#fdae61', 7 ),
+                       rep( '#fee08b', 14 )  )
     
     # save to disk
     outfile <- paste0( outdir, '/supermarket_network.png' )
@@ -75,14 +75,12 @@ plot_supermarket <- function( outdir )
                
     # plot
     plot( g, layout = l, vertex.size = 10, edge.arrow.size = 0.4, vertex.label.cex = 0.5, 
-          vertex.label.color = 'white', vertex.label.font = 2 )
+          vertex.label.color = 'gray10', vertex.label.font = 2 )
 
     dev.off()
 }
 
 ################################################################################
-
-
 
 # output dir
 outdir <- 'out.04.igraph'

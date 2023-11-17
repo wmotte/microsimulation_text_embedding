@@ -263,12 +263,6 @@ load( "out.01.emb/saved_glove.RData" )
 outdir <- 'out.03.superheat'
 dir.create( outdir, showWarnings = FALSE )
 
-# plot matrix
-#image( wv_main )    # 120 x 50
-#image( wv_context ) # 50 x 120
-#image( embedding )  # 120 x 50
-
-
 # loop over types
 type <- 'I'
 
@@ -296,6 +290,5 @@ for( type in c( 'I', 'II', 'III' ) )
     make_heatmap( wv_main_small, paste0( 'wv_main_type_', type ), outdir, order_cols )
     make_heatmap( wv_context_small, paste0( 'wv_context_type_', type ), outdir, order_cols )
     make_heatmap( embedding_small, paste0( 'wv_embedding_type_', type ), outdir, order_cols )
-    
 }
 

@@ -3,6 +3,8 @@
 # W.M. Otte (w.m.otte@umcutrecht.nl)
 #
 #
+# NOTE: *** 100k random walks are unique! ***
+#
 # Microsimulation of a supermarket model with shopping visitors: 
 #
 # Krijkamp EM, Alarid-Escudero F, Enns EA, Jalal HJ, Hunink MGM, Pechlivanoglou P. 
@@ -315,6 +317,9 @@ p <- ggplot( data = sdata, aes( x = as.numeric( time ), y = value * 100, group =
 # save to disk
 ggsave( plot = p, dpi = 300, height = 8, width = 8, file = paste0( outdir, '/network_flow.png' ) )
 
+
+
+
 ######################################
 ######### sample products ############
 ######################################
@@ -335,6 +340,9 @@ i <- 1
 # loop over subjects
 for( i in 1:nrow( mat ) )
 {
+    if( ( i %% 1000 ) == 0 )
+        print( i )
+    
     # get subject route
     vsub <- mat[ i, ]
     
@@ -382,6 +390,9 @@ for( i in 1:nrow( mat ) )
 # remove words < 5
 nwords <- stringr::str_count( all, ' ' ) + 1
 tmp <- all[ nwords >= 5 ]
+
+# remove duplicated random walks
+tmp <- tmp[ !duplicated( tmp ) ]
 
 # select complete number 
 final_set <- tmp[ 1:100000 ]

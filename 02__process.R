@@ -143,11 +143,6 @@ load( "out.01.emb/saved_glove.RData" )
 outdir <- 'out.02.process'
 dir.create( outdir, showWarnings = FALSE )
 
-# plot matrix
-#image( wv_main )    # 120 x 50
-#image( wv_context ) # 50 x 120
-#image( embedding )  # 120 x 50
-
 # neighbors
 nn <- calculate_neighbors( embedding )
 
@@ -195,15 +190,18 @@ for( type in c( 'I', 'II', 'III' ) )
     df$label <- as.factor( df$label )
     df$section <- as.factor( df$section )
 
+    # colors: https://colorbrewer2.org/#type=diverging&scheme=RdYlGn&n=5
+    custom_colors <- c( '#fdae61', '#fee08b', '#a6d96a', '#d9ef8b' )
+    
     # get map
     p <- ggplot( df, aes( x = UMAP1, y = UMAP2 ) ) +
-         geom_point( aes( fill = section ), shape = 21, colour = 'gray30', size = 3 ) +
-         geom_label_repel( aes( label = label, fill = section ), color = 'white', segment.colour="gray30", size = 2.5, alpha = 0.8 ) +
+         geom_point( aes( fill = section ), shape = 21, colour = 'gray20', size = 4 ) +
+         geom_label_repel( aes( label = label, fill = section ), color = 'gray10', segment.colour = "gray60", size = 2.5, alpha = 0.9 ) +
          xlab( 'dimension I' ) +
          ylab( 'dimension II' ) +
          scale_x_continuous( breaks = number_ticks( 6 ) ) +
          scale_y_continuous( breaks = number_ticks( 6 ) ) +
-        
+         scale_fill_manual( values = custom_colors ) +
          theme_bw( base_size = 12 ) %+replace% 
          theme( legend.position = "top",
                axis.ticks = element_blank(), 
@@ -216,7 +214,7 @@ for( type in c( 'I', 'II', 'III' ) )
                complete = FALSE )
     
     # save to disk
-    ggsave( plot = p, dpi = 300, height = 7, width = 7, file = paste0( outdir, '/map_embedding_type_', type, '.png' ) )
+    ggsave( plot = p, dpi = 900, height = 7, width = 7, file = paste0( outdir, '/map_embedding_type_', type, '.png' ) )
 }
 
 

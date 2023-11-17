@@ -4,12 +4,17 @@
 #
 # https://medium.com/cmotions/nlp-with-r-part-2-training-word-embedding-models-and-visualize-results-ae444043e234
 #
+################################################################################
 library( "text2vec" )
+
+# output dir
+outdir <- 'out.01.emb'
+dir.create( outdir, showWarnings = FALSE )
 
 # input data
 df <- readr::read_lines( 'out.00.sim/plain_text.txt.gz' )
 
-# 987,808 words
+# 982,974 words
 sum( stringr::str_count( df, ' ' ) + 1 )
 
 # input to GloVe is a single line, but we do not want word counts to influence at boundaries
@@ -28,6 +33,9 @@ vocab <- create_vocabulary( it )
 
 # prune to get rid of maximal "@"
 vocab <- prune_vocabulary( vocab, term_count_max = 999980 )
+
+# write to file
+readr::write_tsv( vocab, file = paste0( outdir, '/vocab_summary.tsv' ), quote = 'all' )
 
 # Use our filtered vocabulary
 vectorizer <- vocab_vectorizer( vocab )
@@ -50,10 +58,6 @@ dim( wv_context )
 
 # combine main embedding and context embedding (sum) into one matrix
 embedding <- wv_main + t( wv_context )
-
-# output dir
-outdir <- 'out.01.emb'
-dir.create( outdir, showWarnings = FALSE )
 
 # save files to disk
 save( vocab, tcm, glove, wv_main, wv_context, embedding, file = paste0( outdir, "/saved_glove.RData" ) )
