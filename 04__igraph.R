@@ -49,35 +49,43 @@ plot_supermarket <- function( outdir )
     # set diag to 0
     diag( pmat ) <- 0
 
+    # remove exit
+    pmat <- pmat[ 1:40, 1:40 ]
+    
     # absorption in prob. at each cycle
-    absorption_per_cycle <- 1 - rowSums( pmat, na.rm = TRUE )
+    #absorption_per_cycle <- 1 - rowSums( pmat, na.rm = TRUE )
     
     # build the graph object
     g <- graph_from_adjacency_matrix( as.matrix( pmat ), weighted = TRUE )
-    
-    # get grid-kind of layout
-    set.seed( 123 )    
-    l <- layout_with_lgl( g )
-    
-    # reposition 12 and 13
-    l[ 12, ] <- c( -50, -26.36 )
-    l[ 13, ] <- c( -48.2, -31.8 )
-    
+
     # colors similar to umap decomposition
     V( g )$color <- c( rep( '#a6d96a', 11 ), 
                        rep( '#d9ef8b', 8 ), 
                        rep( '#fdae61', 7 ),
                        rep( '#fee08b', 14 )  )
+        
+    good_seeds <- c( 2, 4, 6, 11, 23, 27, 39, 44 )
     
-    # save to disk
-    outfile <- paste0( outdir, '/supermarket_network.png' )
-    png( outfile, height = 3200, width = 3200, res = 500 )
-               
-    # plot
-    plot( g, layout = l, vertex.size = 10, edge.arrow.size = 0.4, vertex.label.cex = 0.5, 
-          vertex.label.color = 'gray10', vertex.label.font = 2 )
+    for( sseed in good_seeds )
+    {
+        # get grid-kind of layout
+        set.seed( sseed )    
+        l <- layout_with_lgl( g )
+    
+        # reposition 12 and 13
+        #l[ 12, ] <- c( -50, -26.36 )
+        #l[ 13, ] <- c( -48.2, -31.8 )
+        
+        # save to disk
+        outfile <- paste0( outdir, '/supermarket_network___layout_variant__', sseed, '.png' )
+        png( outfile, height = 3200, width = 3200, res = 500 )
+                   
+        # plot
+        plot( g, layout = l, vertex.size = 10, edge.arrow.size = 0.4, vertex.label.cex = 0.5, 
+              vertex.label.color = 'gray10', vertex.label.font = 2 )
 
-    dev.off()
+        dev.off()
+    }
 }
 
 ################################################################################

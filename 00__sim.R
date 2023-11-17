@@ -79,14 +79,6 @@ get_general_transition_matrix <- function()
     
     tmat <- as.matrix( tmat )
     
-    #library( 'igraph' )
-    
-    # build the graph object
-    #network <- graph_from_adjacency_matrix( as.matrix( tmat ) )
-    
-    # plot it
-    #plot( network, vertex.size = 8, vertex.label = NA )
-    
     # relative contribution of weights
     p_backward <- 2 # lower triangle
     p_forward <- 10 # upper triangle
@@ -264,9 +256,10 @@ place_products <- function( vchain )
         vchain[ vchain %in% paste0( 'H37', '_', type ) ] <- paste0( 'Snacks', '_', type )
         vchain[ vchain %in% paste0( 'H38', '_', type ) ] <- paste0( 'Twix', '_', type )
         vchain[ vchain %in% paste0( 'H39', '_', type ) ] <- paste0( 'Pringles', '_', type )        
-
-        # end of line
         vchain[ vchain %in% paste0( 'H40', '_', type ) ] <- paste0( 'ShoppingBag', '_', type )
+        
+        # end of line
+        vchain[ vchain %in% paste0( 'H41', '_', type ) ] <- paste0( 'Exit', '_', type )
     }
     
     return( vchain )
@@ -299,7 +292,7 @@ df <- MicroSim( general_transition_matrix, v.M_1, n.i, n.t, v.n ) # run for no t
 data_long <- process_plotting_data( df )
 
 # select subset of network nodes to visualize
-selected_nodes <- c( "H1", paste0( "H", seq( 3, 40, 5 ) ), "H40" )
+selected_nodes <- c( "H1", paste0( "H", seq( 3, 40, 5 ) ), "H41" )
 
 # subset of nodes
 sdata <- data_long[ data_long$variable %in% selected_nodes, ]
@@ -318,8 +311,6 @@ p <- ggplot( data = sdata, aes( x = as.numeric( time ), y = value * 100, group =
 ggsave( plot = p, dpi = 300, height = 8, width = 8, file = paste0( outdir, '/network_flow.png' ) )
 
 
-
-
 ######################################
 ######### sample products ############
 ######################################
@@ -328,6 +319,34 @@ ggsave( plot = p, dpi = 300, height = 8, width = 8, file = paste0( outdir, '/net
 
 # <n_subjects> x <n_cycles>
 dim( mat <- df$m.M )
+
+# get cycle length for each subject [76 means: still in supermarket]
+cycle_length <- 76 - matrixStats::rowCounts( mat, value = 'H41' )
+
+# get some numbers of length of stay of subjects in supermarket
+stats_cycles <- data.frame( min_states_before_exit = min( cycle_length ),
+            mean_states_before_exit = round( mean( cycle_length[ cycle_length != 76 ] ), 0 ),
+            max_states_before_exit = max( cycle_length ) )
+
+# write to disk
+readr::write_tsv( stats_cycles, file = paste0( outdir, '/cycle_length__stats.tsv' ), quote = 'all' )
+
+# write to disk
+readr::write_tsv( data.frame( cycle_length ), file = paste0( outdir, '/cycle_length.tsv' ), quote = 'all' )
+
+# plot histogram with percentages
+p_cycle_l <- 
+    ggplot( data = data.frame( x = cycle_length ), aes( x = x ) ) + 
+    geom_histogram( aes( y = (..count..) / sum(..count..) ),
+    colour = 'gray30', bins = 12, fill = 'orange' ) + theme_custom() + 
+    scale_x_continuous( breaks = number_ticks( 12 ) ) +
+    scale_y_continuous( breaks = number_ticks( 10 ), labels = scales::percent ) +
+    xlab( 'States before exit' ) + ylab( 'Amount of subjects' ) + theme( legend.position = 'none' )
+
+# save to disk
+ggsave( plot = p_cycle_l, dpi = 300, height = 8, width = 8, file = paste0( outdir, '/states_before_exit.png' ) )
+
+
 
 # probability of product taking
 prob <- 0.15
@@ -346,6 +365,9 @@ for( i in 1:nrow( mat ) )
     # get subject route
     vsub <- mat[ i, ]
     
+    # remove EXIT nodes
+    vsub <- vsub[ vsub != 'H41' ]
+    
     # get product taken
     vproducts <- vsub[ rbernoulli( length( vsub ), p = prob ) ]
     
@@ -357,26 +379,32 @@ for( i in 1:nrow( mat ) )
         vproducts <- paste0( vproducts, '_', vvs )
         
         # identify lagging states (up to 3 positions)
-        idx1 <- vproducts == dplyr::lag( vproducts, 1 )
-        idx2 <- vproducts == dplyr::lag( vproducts, 2 )
-        idx3 <- vproducts == dplyr::lag( vproducts, 3 )    
+        #
+        # NOTE: not used as double words are also in normal language available
+        # i.e., 'wat het is, is goed.
+        # of: 'als achter vliegen vliegen vliegen, vliegen vliegen vliegen achterna.'
+        #
+        #idx1 <- vproducts == dplyr::lag( vproducts, 1 )
+        #idx2 <- vproducts == dplyr::lag( vproducts, 2 )
+        #idx3 <- vproducts == dplyr::lag( vproducts, 3 )    
         
         # set first NA to false (due to lag function)
-        idx1[ 1 ] <- FALSE
+        #idx1[ 1 ] <- FALSE
         
-        idx2[ 1 ] <- FALSE
-        idx2[ 2 ] <- FALSE
+        #idx2[ 1 ] <- FALSE
+        #idx2[ 2 ] <- FALSE
         
-        idx3[ 1 ] <- FALSE
-        idx3[ 2 ] <- FALSE
-        idx3[ 3 ] <- FALSE
+        #idx3[ 1 ] <- FALSE
+        #idx3[ 2 ] <- FALSE
+        #idx3[ 3 ] <- FALSE
         
         # get negation
-        idx <- ( idx1 + idx2 + idx3 ) == 0
+        #idx <- ( idx1 + idx2 + idx3 ) == 0
     
         # remove direct following duplicates, up to 3
-        vchain <- vproducts[ idx ]
-    
+        #vchain <- vproducts[ idx ]
+        vchain <- vproducts
+        
         # place random products [i.e., H1 -> Apples_I, Apples_II, Apples_III ]
         vchain <- place_products( vchain )
         
@@ -387,6 +415,7 @@ for( i in 1:nrow( mat ) )
     }
 }
 
+
 # remove words < 5
 nwords <- stringr::str_count( all, ' ' ) + 1
 tmp <- all[ nwords >= 5 ]
@@ -395,18 +424,18 @@ tmp <- all[ nwords >= 5 ]
 tmp <- tmp[ !duplicated( tmp ) ]
 
 # select complete number 
-final_set <- tmp[ 1:100000 ]
+final_set <- tmp[ 1:80000 ]
 
 # get summary
-nwords <- stringr::str_count( final_set, ' ' ) + 1
-dim( final_set )
-summary( nwords )
+nwords_final <- stringr::str_count( final_set, ' ' ) + 1
+length( final_set )
+summary( nwords_final )
 
 # plot density
 p_sen <- 
-    ggplot( data = data.frame( x = nwords ), aes( x = x ) ) + 
-    geom_histogram( colour = 'gray30', bins = max( nwords ) - 4, fill = 'orange' ) + theme_custom() + 
-    scale_x_continuous( breaks = number_ticks( max( nwords ) - 4 ) ) +
+    ggplot( data = data.frame( x = nwords_final ), aes( x = x ) ) + 
+    geom_histogram( colour = 'gray30', bins = max( nwords ) - 5, fill = 'orange' ) + theme_custom() + 
+    scale_x_continuous( breaks = number_ticks( max( nwords ) - 5 ) ) +
     scale_y_continuous( breaks = number_ticks( 10 ) ) +
     xlab( 'Products in list (N)' ) + ylab( 'Number of lists' ) + theme( legend.position = 'none' )
 

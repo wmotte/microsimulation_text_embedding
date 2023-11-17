@@ -4,8 +4,10 @@
 #
 ################################################################################
 library( "ggplot2" )
-library( "ggrepel" )
-library( "ggcorrplot" )
+#library( "ggrepel" )
+#library( "ggcorrplot" )
+
+library( 'superheat' )
 
 ################################################################################
 # FUNCTIONS
@@ -77,31 +79,28 @@ load( 'out.01.emb/saved_glove.RData' )
 embedding <- glove <- vocab <- wv_context <- wv_main <- NULL
 
 
-identifier <- '_I$'
-mat <- tcm[ grep( identifier, rownames( tcm ) ), grep( identifier, colnames( tcm ) ) ]
-rownames( mat ) <- gsub( identifier, '', rownames( mat ) )
-colnames( mat ) <- gsub( identifier, '', colnames( mat ) )
+for( type in c( 'I', 'II', 'III' ) )
+{
+    
+    identifier <- paste0( '_', type, '$' )
 
-#ss <- get_sections()
+    mat <- tcm[ grep( identifier, rownames( tcm ) ), grep( identifier, colnames( tcm ) ) ]
+    rownames( mat ) <- gsub( identifier, '', rownames( mat ) )
+    colnames( mat ) <- gsub( identifier, '', colnames( mat ) )
+    
+    # get separate matrix for numbers [because of NA text issues]
+    mmat <- round( t( as.matrix( mat ) ), 0 )
+    mmat_text <- mmat
+    mmat[ mmat == 0 ] <- NA
 
-# order as sections
-#mat <- mat[ rev( ss$label ), rev( ss$label ) ]
-
-library( 'superheat' )
-
-mmat <- round( t( as.matrix( mat ) ), 0 )
-mmat_text <- mmat
-mmat[ mmat == 0 ] <- NA
-
-
-
-# save to disk
-outfile <- paste0( outdir, '/tcm.png' )
-png( outfile, height = 5000, width = 5000, res = 300 )
-
-superheat( mmat,
+    # save to disk
+    outfile <- paste0( outdir, '/tcm_', type, '.png' )
+    png( outfile, height = 5000, width = 5000, res = 300 )
+    
+    # heat plot
+    superheat( mmat,
            # place dendrograms on columns and rows 
-           row.dendrogram = F, col.dendrogram = F,
+           #row.dendrogram = F, col.dendrogram = F,
            
            heat.na.col = "white",
            
@@ -120,30 +119,5 @@ superheat( mmat,
            bottom.label.text.size = 5,
            legend = FALSE )
 
-dev.off()
-
-# get sections
-
-tmp <- as.data.frame( as.matrix( mat ) )
-
-# long format
-dfmat <- reshape2::melt( tmp, na.rm = TRUE )
-
-head( dfmat )
-
-# matrix plot
-pmat <- ggplot( data = dfmat, mapping = aes_string( x = "Var1", y = "Var2", fill = "value" ) ) +
-    geom_tile( color = 'white' ) + 
-    scale_x_continuous( breaks = c( 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50 ) ) +
-    # color scheme, diverging with white in the middle
-    scale_fill_gradient2( midpoint = 0, low = "#6D9EC1", mid = "white", high = "#E46726", space = "Lab" ) +
-    xlab( 'embedding (dim)' ) + ylab( 'item' ) +
-    theme_custom( 12 ) + theme( legend.position = 'none' )
-
-pmat
-
-# save to disk
-ggsave( plot = pmat, dpi = 300, height = 8, width = 11, file = paste0( outdir, '/mat_', sname, '.png' ) )
-
-
-
+    dev.off()
+}

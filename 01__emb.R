@@ -14,7 +14,7 @@ dir.create( outdir, showWarnings = FALSE )
 # input data
 df <- readr::read_lines( 'out.00.sim/plain_text.txt.gz' )
 
-# 982,974 words
+# 804,422 words
 sum( stringr::str_count( df, ' ' ) + 1 )
 
 # input to GloVe is a single line, but we do not want word counts to influence at boundaries
@@ -32,7 +32,7 @@ it <- itoken( tokens, progressbar = TRUE )
 vocab <- create_vocabulary( it )
 
 # prune to get rid of maximal "@"
-vocab <- prune_vocabulary( vocab, term_count_max = 999980 )
+vocab <- prune_vocabulary( vocab, term_count_max = vocab[ vocab$term == '@', 'term_count' ] - 1 )
 
 # write to file
 readr::write_tsv( vocab, file = paste0( outdir, '/vocab_summary.tsv' ), quote = 'all' )
