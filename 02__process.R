@@ -182,9 +182,10 @@ sname <- 'average'
 # get max value to normalize matrix
 max_value <- max( abs( embedding_small ) )
 
-# sort
+# TODO: sort
 #tmp <- as.data.frame( embedding_small )#$group <- 'piet'
 #tmp$group <- rownames( tmp )
+# df[order(df[,1],df[,2],decreasing=TRUE),]
 
 # save to disk
 ggsave( plot = p, dpi = 300, height = 7, width = 7, file = paste0( outdir, '/map_embedding_type_', type, '.png' ) )
