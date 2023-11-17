@@ -315,12 +315,9 @@ p <- ggplot( data = sdata, aes( x = as.numeric( time ), y = value * 100, group =
 # save to disk
 ggsave( plot = p, dpi = 300, height = 8, width = 8, file = paste0( outdir, '/network_flow.png' ) )
 
-
 ######################################
 ######### sample products ############
 ######################################
-
-
 
 # three product versions per node
 
@@ -407,8 +404,5 @@ ggsave( plot = p_sen, dpi = 300, height = 8, width = 8, file = paste0( outdir, '
 
 # write to plain text file
 readr::write_lines( final_set, file = gzfile( paste0( outdir, '/plain_text.txt.gz' ) ) )
-
-
-
 
 

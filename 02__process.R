@@ -6,6 +6,7 @@
 library( "umap" )
 library( "ggplot2" )
 library( "ggrepel" )
+library( "ggcorrplot" )
 
 ################################################################################
 # FUNCTIONS
@@ -98,6 +99,39 @@ calculate_neighbors <- function( embedding )
     return( all )
 }
 
+###
+# Make heatmap
+##
+make_heatmap <- function( input_matrix, sname )
+{
+    # get max value to normalize matrix
+    max_value <- max( abs( input_matrix ) )
+    
+    # normalize and transpose
+    mat <- t( input_matrix / max_value )
+    
+    # get sections
+    ss <- get_sections()
+    
+    # order as sections
+    mat <- mat[ , rev( ss$label ) ]
+    
+    # long format
+    dfmat <- reshape2::melt( mat, na.rm = TRUE )
+    
+    # matrix plot
+    pmat <- ggplot( data = dfmat, mapping = aes_string( x = "Var1", y = "Var2", fill = "value" ) ) +
+        geom_tile( color = 'white' ) + 
+        scale_x_continuous( breaks = c( 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50 ) ) +
+        # color scheme, diverging with white in the middle
+        scale_fill_gradient2( midpoint = 0, low = "#6D9EC1", mid = "white", high = "#E46726", space = "Lab" ) +
+        xlab( 'embedding (dim)' ) + ylab( 'item' ) +
+        theme_custom( 12 ) + theme( legend.position = 'none' )
+    
+    # save to disk
+    ggsave( plot = pmat, dpi = 300, height = 8, width = 11, file = paste0( outdir, '/mat_', sname, '.png' ) )
+}
+
 ################################################################################
 # END FUNCTIONS
 ################################################################################
@@ -109,11 +143,10 @@ load( "out.01.emb/saved_glove.RData" )
 outdir <- 'out.02.process'
 dir.create( outdir, showWarnings = FALSE )
 
-
-# TODO plot matrix
-image( wv_main )
-image( wv_context )
-image( embedding )
+# plot matrix
+#image( wv_main )    # 120 x 50
+#image( wv_context ) # 50 x 120
+#image( embedding )  # 120 x 50
 
 # neighbors
 nn <- calculate_neighbors( embedding )
@@ -128,16 +161,26 @@ for( type in c( 'I', 'II', 'III' ) )
 {
     identifier <- paste0( "_", type, "$" )
     
-    # only select products 'I' (i.e., 40 x 50 matrix)
-    embedding_small <- embedding[ grep( identifier, rownames( embedding ) ), ]
+    # only select products 'I' (i.e., 40 x 50 matrix) -> wv_main
+    wv_main_small <- wv_main[ grep( identifier, rownames( wv_main ) ), ]
+    rownames( wv_main_small ) <- gsub( identifier, "", rownames( wv_main_small ) )
     
-    # clean names from suffix
+    # only select products 'I' (i.e., 40 x 50 matrix) -> wv_context
+    twv_context <- t( wv_context )
+    wv_context_small <- twv_context[ grep( identifier, rownames( twv_context ) ), ]
+    rownames( wv_context_small ) <- gsub( identifier, "", rownames( wv_context_small ) )
+    
+    # only select products 'I' (i.e., 40 x 50 matrix) -> average of main and context
+    embedding_small <- embedding[ grep( identifier, rownames( embedding ) ), ]
     rownames( embedding_small ) <- gsub( identifier, "", rownames( embedding_small ) )
 
+    # write heat maps of all dimensions as matrices
+    make_heatmap( wv_main_small, paste0( 'wv_main_type_', type ) )
+    make_heatmap( wv_context_small, paste0( 'wv_context_type_', type ) )
+    make_heatmap( embedding_small, paste0( 'wv_embedding_type_', type ) )
+    
     # dimension reduction
     glove_umap <- umap( embedding_small, n_components = 2, metric = 'cosine', min_dist = 0.2 )
-                    #n_components = 2, metric = "cosine", 
-                    #n_neighbors = 5, min_dist = 0.1, spread = 15 )
 
     # do the same for the GloVe embeddings
     df <- as.data.frame( glove_umap$layout, stringsAsFactors = FALSE )
@@ -177,32 +220,5 @@ for( type in c( 'I', 'II', 'III' ) )
 }
 
 
-sname <- 'average'
-
-# get max value to normalize matrix
-max_value <- max( abs( embedding_small ) )
-
-# TODO: sort
-#tmp <- as.data.frame( embedding_small )#$group <- 'piet'
-#tmp$group <- rownames( tmp )
-# df[order(df[,1],df[,2],decreasing=TRUE),]
-
-# save to disk
-ggsave( plot = p, dpi = 300, height = 7, width = 7, file = paste0( outdir, '/map_embedding_type_', type, '.png' ) )
 
 
-# normalize and transpose
-mat <- t( embedding_small / max_value )
-
-
-####### matrices #######
-
-library( "ggcorrplot" )
-
-
-
-p_cor <- ggcorrplot( mat, outline.col = "white", ggtheme = ggplot2::theme_gray,
-            colors = c("#6D9EC1", "white", "#E46726"), show.legend = FALSE, lab_size = 10 )
-
-# save to disk
-ggsave( plot = p_cor, dpi = 300, height = 11, width = 11, file = paste0( outdir, '/mat_', sname, '__type_', type, '.png' ) )
