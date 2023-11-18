@@ -288,6 +288,9 @@ v.M_1 <- rep( "H1", n.i )      # everyone begins in the healthy state
 # get micro-simulations
 df <- MicroSim( general_transition_matrix, v.M_1, n.i, n.t, v.n ) # run for no treatment
 
+# save simulation to disk
+save( df, file = paste0( outdir, "/simulation_df.RData" ) )
+
 # selected long-format data
 data_long <- process_plotting_data( df )
 
@@ -346,8 +349,6 @@ p_cycle_l <-
 # save to disk
 ggsave( plot = p_cycle_l, dpi = 300, height = 8, width = 8, file = paste0( outdir, '/states_before_exit.png' ) )
 
-
-
 # probability of product taking
 prob <- 0.15
 
@@ -370,7 +371,7 @@ for( i in 1:nrow( mat ) )
     
     # get product taken
     vproducts <- vsub[ rbernoulli( length( vsub ), p = prob ) ]
-    
+
     # only continue if at least six products are available
     if( length( vproducts ) > 5 )
     {
@@ -378,31 +379,6 @@ for( i in 1:nrow( mat ) )
         vvs <- get_product_version( length( vproducts ) )
         vproducts <- paste0( vproducts, '_', vvs )
         
-        # identify lagging states (up to 3 positions)
-        #
-        # NOTE: not used as double words are also in normal language available
-        # i.e., 'wat het is, is goed.
-        # of: 'als achter vliegen vliegen vliegen, vliegen vliegen vliegen achterna.'
-        #
-        #idx1 <- vproducts == dplyr::lag( vproducts, 1 )
-        #idx2 <- vproducts == dplyr::lag( vproducts, 2 )
-        #idx3 <- vproducts == dplyr::lag( vproducts, 3 )    
-        
-        # set first NA to false (due to lag function)
-        #idx1[ 1 ] <- FALSE
-        
-        #idx2[ 1 ] <- FALSE
-        #idx2[ 2 ] <- FALSE
-        
-        #idx3[ 1 ] <- FALSE
-        #idx3[ 2 ] <- FALSE
-        #idx3[ 3 ] <- FALSE
-        
-        # get negation
-        #idx <- ( idx1 + idx2 + idx3 ) == 0
-    
-        # remove direct following duplicates, up to 3
-        #vchain <- vproducts[ idx ]
         vchain <- vproducts
         
         # place random products [i.e., H1 -> Apples_I, Apples_II, Apples_III ]
@@ -410,11 +386,10 @@ for( i in 1:nrow( mat ) )
         
         # collapse
         vsubject <- paste( vchain, collapse = " " )
-        
+
         all <- rbind( all, vsubject )
     }
 }
-
 
 # remove words < 5
 nwords <- stringr::str_count( all, ' ' ) + 1

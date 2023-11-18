@@ -1,0 +1,13 @@
+
+
+vsubject "1 -> Mangoes_I Lemonade_II CaramelBars_II Sweets_II Sweets_II CaramelBars_II CaramelBars_I CaramelBars_III ChewingGum_I"                                                                                                                             
+vsubject "2 -> Pineapples_III Cauliflower_III Sodawater_II CaramelBars_II Sweets_III ShoppingBag_III"                                                                                                                                                          
+vsubject "4 -> Grapes_I Pineapples_I Pineapples_I Watermelons_II Coffee_I Cassis_II Snickers_III Sweets_II Crackers_II MixedNuts_III"                                                                                                                          
+vsubject "5 -> Apples_I Oranges_III Pineapples_I Cucumbers_III Zucchini_III Lemonade_I BitterLemon_II Cassis_I Cassis_II ChocolateBar_III GummyBears_I Pringles_I Popcorn_III PotatoChips_I Sweets_II ChocolateBar_III ChocolateBar_II Crackers_II MixedNuts_I"
+
+vsubject "7 -> Pineapples_III Strawberries_II Cucumbers_II Peppers_I Peppers_II Crackers_III Snacks_I Twix_III"                                                                                                                                                
+vsubject "8 -> Grapes_III Strawberries_III CaramelBars_III CaramelBars_II CaramelBars_I Crackers_III ChocolateBar_II MixedNuts_III Popcorn_III ChocolateBar_I Crackers_II Popcorn_III Snickers_III Sweets_III"                                                 
+
+vsubject "9 -> Grapes_I Mangoes_III Watermelons_III Snickers_I CaramelBars_II Sweets_II Sweets_III CaramelBars_II CaramelBars_II ChewingGum_II Crackers_II Twix_I Snacks_III"                                                                                  
+
+vsubject "10 -> Coffee_I Cola_I Tea_III ChocolateBar_III Snacks_I ShoppingBag_II"  
