@@ -10,4 +10,4 @@ vsubject "8 -> Grapes_III Strawberries_III CaramelBars_III CaramelBars_II Carame
 
 vsubject "9 -> Grapes_I Mangoes_III Watermelons_III Snickers_I CaramelBars_II Sweets_II Sweets_III CaramelBars_II CaramelBars_II ChewingGum_II Crackers_II Twix_I Snacks_III"                                                                                  
 
-vsubject "10 -> Coffee_I Cola_I Tea_III ChocolateBar_III Snacks_I ShoppingBag_II"  
+vsubject "10 -> Coffee_I Cola_I Tea_III :ag_II"  

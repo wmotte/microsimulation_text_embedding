@@ -79,6 +79,28 @@ load( 'out.01.emb/saved_glove.RData' )
 embedding <- glove <- vocab <- wv_context <- wv_main <- NULL
 
 
+# container
+Ps <- NULL
+
+# get numbers of Table 1 & 2
+#
+for( i in c( 'Oranges_I', 'Twix_I' ) )
+{
+    for( j in c( 'Apples_I', 'Snickers_I', 'Cola_I', 'Lemonade_I', 'Peppers_I' ) )
+    {
+        #print( tcm[ i, j ] )
+        val <- round( max( c( tcm[ i, j ], tcm[ j, i ] ) ), 0 )
+        
+        pr <- paste0( i, ' - ', j, ' - ', val )
+        Ps <- rbind( Ps, pr )
+    }
+}
+
+# write data for Table 1 and 2 to disk
+write.csv( Ps, file = paste0( outdir, '/table_1_and_2_tcm_values.csv' ), quote = TRUE )
+
+
+# loop over other types to plot matrix
 for( type in c( 'I', 'II', 'III' ) )
 {
     
