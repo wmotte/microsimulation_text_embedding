@@ -168,7 +168,11 @@ make_heatmap <- function( input_matrix, sname, outdir, order_cols )
     
     # get similarity matrix
     simil <- cosine_sim( t( mat ) )
-    
+
+    # write similarity matrix to disk
+    outfile_simil <- paste0( outdir, '/', sname, '__similarity_matrix.Rdata' )
+    save( simil, file = outfile_simil )
+        
     ###### PLOT 1 ####
     
     # save to disk
