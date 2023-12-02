@@ -85,10 +85,17 @@ calculate_neighbors <- function( embedding )
         cos_sim <- text2vec::sim2( x = embedding, y = single, method = "cosine", norm = "l2" )
         
         # get highest correspond (n=10)
-        corr <- sort( cos_sim[ , 1 ], decreasing = TRUE )[ 2:11 ]
+        corr_h <- sort( cos_sim[ , 1 ], decreasing = TRUE )[ 2:11 ]
+        
+        # get lowest corresponding (n=10)
+        corr_l <- sort( cos_sim[ , 1 ], decreasing = FALSE )[ 1:10 ]
+        
+        corr <- c( corr_h, corr_l )
+        
+        group <- c( rep( 'most', 10 ), rep( 'least', 10 ) )
         
         # into d.f.
-        data <- data.frame( product = vname, closest_by = names( corr ), similarity = round( corr, 3 ) )
+        data <- data.frame( product = vname, group = group, closest_by = names( corr ), similarity = round( corr, 3 ) )
         
         # merge into container
         all <- rbind( all, data )
@@ -219,4 +226,11 @@ for( type in c( 'I', 'II', 'III' ) )
 
 
 
+# make nearestneighbor for the 4 cluster centers.
+df <- readr::read_csv( 'out.02.process/nearest_neighbors.csv' )
 
+sel <- df[ df$product %in% c( 'Lime_I', 'Lemonade_I', 'GummyBears_I', 'Onion_I' ), ]
+
+#sel <- df[ grepl( 'Lime_I|Lemonade|GummyBears|Onion', df$product ), ]
+
+readr::write_tsv( sel, file = 'doc/Tabel_6.tsv', quote = 'all' )
