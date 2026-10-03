@@ -279,6 +279,11 @@ dir.create( outdir, showWarnings = FALSE )
 # get transition matrix (from Excel sheet)
 general_transition_matrix <- get_general_transition_matrix()
 
+# write transition matrix to disk (S1 Table; H41 is the absorbing exit state, not a shelf)
+tm_out <- data.frame( from = paste0( "H", 1:nrow( general_transition_matrix ) ), round( general_transition_matrix, 4 ) )
+colnames( tm_out ) <- c( 'from', paste0( "H", 1:ncol( general_transition_matrix ) ) )
+readr::write_tsv( tm_out, file = paste0( outdir, '/transition_matrix.tsv' ) )
+
 # Model input
 n.i   <- 105000                # number of simulated individuals
 n.t   <- 75                    # time horizon in cycles
@@ -303,12 +308,14 @@ sdata <- data_long[ data_long$variable %in% selected_nodes, ]
 # save sdata
 readr::write_csv( sdata, file = gzfile( paste0( outdir, '/network_flow.csv.gz' ) ), quote = 'all' )
 
-# plot
-p <- ggplot( data = sdata, aes( x = as.numeric( time ), y = value * 100, group = variable, colour = variable ) ) + 
-    geom_line() + facet_wrap( ~variable, ncol = 2, scales = 'free' ) + theme_custom() + 
+# plot (H41 is the absorbing exit state, not a shelf: label it as such)
+sdata$panel <- factor( ifelse( sdata$variable == 'H41', 'Exit (H41, absorbing state)', as.character( sdata$variable ) ),
+                       levels = c( setdiff( selected_nodes, 'H41' ), 'Exit (H41, absorbing state)' ) )
+p <- ggplot( data = sdata, aes( x = as.numeric( time ), y = value * 100, group = panel, colour = panel ) ) + 
+    geom_line() + facet_wrap( ~panel, ncol = 2, scales = 'free' ) + theme_custom() + 
     scale_x_continuous( breaks = number_ticks( 6 ) ) +
     scale_y_continuous( breaks = number_ticks( 3 ) ) +
-    xlab( 'time' ) + ylab( '%' ) + theme( legend.position = 'none' )
+    xlab( 'Time step' ) + ylab( 'Shoppers at this location (%)' ) + theme( legend.position = 'none' )
 
 # save to disk
 ggsave( plot = p, dpi = 300, height = 8, width = 8, file = paste0( outdir, '/network_flow.png' ) )
@@ -344,7 +351,7 @@ p_cycle_l <-
     colour = 'gray30', bins = 12, fill = 'orange' ) + theme_custom() + 
     scale_x_continuous( breaks = number_ticks( 12 ) ) +
     scale_y_continuous( breaks = number_ticks( 10 ), labels = scales::percent ) +
-    xlab( 'States before exit' ) + ylab( 'Amount of subjects' ) + theme( legend.position = 'none' )
+    xlab( 'Locations visited before exit (76 = still inside after step 75)' ) + ylab( 'Shoppers (%)' ) + theme( legend.position = 'none' )
 
 # save to disk
 ggsave( plot = p_cycle_l, dpi = 300, height = 8, width = 8, file = paste0( outdir, '/states_before_exit.png' ) )
@@ -352,8 +359,11 @@ ggsave( plot = p_cycle_l, dpi = 300, height = 8, width = 8, file = paste0( outdi
 # probability of product taking
 prob <- 0.15
 
-# string container
-all <- NULL
+# string container (list instead of rbind: same random draws and output, but linear time)
+all <- vector( 'list', nrow( mat ) )
+
+# keep track of the source subject of each list
+all_id <- rep( NA, nrow( mat ) )
 
 i <- 1
 
@@ -387,19 +397,43 @@ for( i in 1:nrow( mat ) )
         # collapse
         vsubject <- paste( vchain, collapse = " " )
 
-        all <- rbind( all, vsubject )
+        all[[ i ]] <- vsubject
+        all_id[ i ] <- i
     }
 }
+all_id <- all_id[ !sapply( all, is.null ) ]
+all <- unlist( all )
 
 # remove words < 5
 nwords <- stringr::str_count( all, ' ' ) + 1
 tmp <- all[ nwords >= 5 ]
+tmp_id <- all_id[ nwords >= 5 ]
 
 # remove duplicated random walks
-tmp <- tmp[ !duplicated( tmp ) ]
+is_dup <- duplicated( tmp )
+tmp <- tmp[ !is_dup ]
+tmp_id <- tmp_id[ !is_dup ]
 
 # select complete number 
 final_set <- tmp[ 1:80000 ]
+final_id <- tmp_id[ 1:80000 ]
+
+# record what happened to all simulated subjects
+filter_counts <- data.frame( 
+    simulated = nrow( mat ),
+    still_inside_at_step_75 = sum( mat[ , ncol( mat ) ] != 'H41' ),
+    discarded_lt_6_products = nrow( mat ) - length( all ),
+    duplicated_lists = sum( is_dup ),
+    unique_lists = length( tmp ),
+    not_used_surplus = length( tmp ) - 80000,
+    in_corpus = length( final_set ),
+    in_corpus_still_inside_at_step_75 = sum( mat[ final_id, ncol( mat ) ] != 'H41' ),
+    tokens = sum( stringr::str_count( final_set, ' ' ) + 1 ) )
+print( t( filter_counts ) )
+readr::write_tsv( filter_counts, file = paste0( outdir, '/filter_counts.tsv' ) )
+
+# example sentences (Box 1)
+readr::write_lines( final_set[ 1:10 ], file = paste0( outdir, '/example_sentences.txt' ) )
 
 # get summary
 nwords_final <- stringr::str_count( final_set, ' ' ) + 1

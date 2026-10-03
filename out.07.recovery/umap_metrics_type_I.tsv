@@ -1,0 +1,2 @@
+set	n_items	n_pairs	spearman_rho	neighbour_precision	neighbour_precision_chance	mantel_p	trustworthiness_k5	procrustes_r	procrustes_p
+I	40	780	0.916808288115397	0.55	0.0666666666666667	0.001	0.964609375	0.932303956476029	0.001

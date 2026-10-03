@@ -1,0 +1,2 @@
+rank	x_max	alpha	learning_rate	n_iter	convergence_tol	n_threads	seed	skip_grams_window	weighting	final_cost	n_iter_run
+50	100	0.75	0.15	100	1e-5	1	444	5	1/distance, symmetric, no counts across lists	0.003857	100

@@ -1,0 +1,11 @@
+i	k	X_ik	X_i	P_k_given_i	ratio_oranges_twix
+Oranges_I	Apples_I	89.4	7110.6	0.0126	21.54
+Oranges_I	Snickers_I	56.5	7110.6	0.00795	0.7
+Oranges_I	Cola_I	48.5	7110.6	0.00682	3.52
+Oranges_I	Lemonade_I	54.1	7110.6	0.00762	2.58
+Oranges_I	Peppers_I	56.1	7110.6	0.00789	3.93
+Twix_I	Apples_I	9.8	16818.3	5.85e-4	NA
+Twix_I	Snickers_I	191.1	16818.3	0.0114	NA
+Twix_I	Cola_I	32.6	16818.3	0.00194	NA
+Twix_I	Lemonade_I	49.7	16818.3	0.00295	NA
+Twix_I	Peppers_I	33.7	16818.3	0.00201	NA

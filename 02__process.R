@@ -181,8 +181,12 @@ for( type in c( 'I', 'II', 'III' ) )
     make_heatmap( wv_context_small, paste0( 'wv_context_type_', type ) )
     make_heatmap( embedding_small, paste0( 'wv_embedding_type_', type ) )
     
-    # dimension reduction
-    glove_umap <- umap( embedding_small, n_components = 2, metric = 'cosine', min_dist = 0.2 )
+    # dimension reduction (seeded; n_neighbors = 15 is the package default, made explicit)
+    glove_umap <- umap( embedding_small, n_components = 2, metric = 'cosine', min_dist = 0.2, 
+                        n_neighbors = 15, random_state = 123 )
+
+    # save layout (used in 07__recovery.R)
+    write.table( glove_umap$layout, file = paste0( outdir, '/umap_layout_type_', type, '.tsv' ), sep = '\t', quote = FALSE, col.names = FALSE )
 
     # do the same for the GloVe embeddings
     df <- as.data.frame( glove_umap$layout, stringsAsFactors = FALSE )
@@ -229,7 +233,19 @@ for( type in c( 'I', 'II', 'III' ) )
 # make nearestneighbor for the 4 cluster centers.
 df <- readr::read_csv( 'out.02.process/nearest_neighbors.csv' )
 
-sel <- df[ df$product %in% c( 'Lime_I', 'Lemonade_I', 'GummyBears_I', 'Onion_I' ), ]
+# medoids of the PAM clustering of all 120 products (out.06.cluster, k = 4); R0 used Lime, Lemonade, GummyBears, Onion (type I)
+medoids <- c( 'Lime_I', 'Lemonade_I', 'GummyBears_I', 'Onion_I' )
+if( file.exists( 'out.06.cluster/medoids_all_k4.txt' ) )
+    medoids <- readLines( 'out.06.cluster/medoids_all_k4.txt' )
+
+sel <- df[ df$product %in% medoids, ]
+
+# add the shortest-path distance between the two shelves (steps) and the frequency of the related product (R1: Table 6)
+source( 'functions.R' )
+dg <- get_graph_distance()
+sel$graph_distance <- dg[ cbind( sub( '_[I]+$', '', sel$product ), sub( '_[I]+$', '', sel$closest_by ) ) ]
+vocab_counts <- readr::read_tsv( 'out.01.emb/vocab_summary.tsv', show_col_types = FALSE )
+sel$frequency <- vocab_counts$term_count[ match( sel$closest_by, vocab_counts$term ) ]
 
 #sel <- df[ grepl( 'Lime_I|Lemonade|GummyBears|Onion', df$product ), ]
 

@@ -1,81 +1,81 @@
-"product"	"group"	"closest_by"	"similarity"
-"Onion_I"	"most"	"Onion_II"	0.922
-"Onion_I"	"most"	"Onion_III"	0.914
-"Onion_I"	"most"	"Spinach_I"	0.899
-"Onion_I"	"most"	"Spinach_III"	0.875
-"Onion_I"	"most"	"Spinach_II"	0.832
-"Onion_I"	"most"	"Eggplant_I"	0.819
-"Onion_I"	"most"	"Eggplant_III"	0.792
-"Onion_I"	"most"	"Eggplant_II"	0.774
-"Onion_I"	"most"	"Cassis_II"	0.756
-"Onion_I"	"most"	"Cassis_III"	0.751
-"Onion_I"	"least"	"Coffee_II"	0.005
-"Onion_I"	"least"	"Coffee_I"	0.012
-"Onion_I"	"least"	"Coffee_III"	0.042
-"Onion_I"	"least"	"ShoppingBag_I"	0.055
-"Onion_I"	"least"	"ShoppingBag_II"	0.093
-"Onion_I"	"least"	"Pringles_I"	0.126
-"Onion_I"	"least"	"Twix_I"	0.127
-"Onion_I"	"least"	"ShoppingBag_III"	0.133
-"Onion_I"	"least"	"Cola_I"	0.144
-"Onion_I"	"least"	"Twix_III"	0.146
-"Lime_I"	"most"	"Lime_II"	0.959
-"Lime_I"	"most"	"Apples_III"	0.938
-"Lime_I"	"most"	"Strawberries_I"	0.934
-"Lime_I"	"most"	"Lime_III"	0.934
-"Lime_I"	"most"	"Bananas_II"	0.929
-"Lime_I"	"most"	"Bananas_I"	0.925
-"Lime_I"	"most"	"Apples_I"	0.922
-"Lime_I"	"most"	"Bananas_III"	0.917
-"Lime_I"	"most"	"Mangoes_III"	0.917
-"Lime_I"	"most"	"Apples_II"	0.907
-"Lime_I"	"least"	"ShoppingBag_II"	0.045
-"Lime_I"	"least"	"ShoppingBag_I"	0.057
-"Lime_I"	"least"	"ShoppingBag_III"	0.082
-"Lime_I"	"least"	"Pringles_I"	0.113
-"Lime_I"	"least"	"Twix_I"	0.154
-"Lime_I"	"least"	"Twix_III"	0.174
-"Lime_I"	"least"	"Spinach_II"	0.223
-"Lime_I"	"least"	"Pringles_II"	0.225
-"Lime_I"	"least"	"Snacks_II"	0.241
-"Lime_I"	"least"	"Pringles_III"	0.26
-"Lemonade_I"	"most"	"Lemonade_III"	0.959
-"Lemonade_I"	"most"	"Lemonade_II"	0.948
-"Lemonade_I"	"most"	"Peppers_I"	0.93
-"Lemonade_I"	"most"	"Peppers_III"	0.922
-"Lemonade_I"	"most"	"Zucchini_II"	0.917
-"Lemonade_I"	"most"	"Cola_II"	0.909
-"Lemonade_I"	"most"	"Sodawater_II"	0.901
-"Lemonade_I"	"most"	"Peppers_II"	0.899
-"Lemonade_I"	"most"	"Sodawater_I"	0.898
-"Lemonade_I"	"most"	"Tomatoes_I"	0.897
-"Lemonade_I"	"least"	"Spinach_II"	0.286
-"Lemonade_I"	"least"	"Onion_I"	0.348
-"Lemonade_I"	"least"	"Onion_II"	0.355
-"Lemonade_I"	"least"	"Spinach_III"	0.357
-"Lemonade_I"	"least"	"Spinach_I"	0.366
-"Lemonade_I"	"least"	"Onion_III"	0.37
-"Lemonade_I"	"least"	"Pringles_I"	0.378
-"Lemonade_I"	"least"	"ShoppingBag_II"	0.381
-"Lemonade_I"	"least"	"ShoppingBag_I"	0.394
-"Lemonade_I"	"least"	"ShoppingBag_III"	0.413
-"GummyBears_I"	"most"	"ChocolateBar_II"	0.941
-"GummyBears_I"	"most"	"MixedNuts_I"	0.94
-"GummyBears_I"	"most"	"Crackers_II"	0.94
-"GummyBears_I"	"most"	"ChewingGum_III"	0.939
-"GummyBears_I"	"most"	"GummyBears_III"	0.938
-"GummyBears_I"	"most"	"ChocolateBar_I"	0.937
-"GummyBears_I"	"most"	"ChewingGum_I"	0.931
-"GummyBears_I"	"most"	"ChewingGum_II"	0.928
-"GummyBears_I"	"most"	"ChocolateBar_III"	0.928
-"GummyBears_I"	"most"	"GummyBears_II"	0.927
-"GummyBears_I"	"least"	"Grapes_II"	0.277
-"GummyBears_I"	"least"	"Oranges_II"	0.306
-"GummyBears_I"	"least"	"Grapes_III"	0.317
-"GummyBears_I"	"least"	"Oranges_III"	0.324
-"GummyBears_I"	"least"	"Grapes_I"	0.327
-"GummyBears_I"	"least"	"Spinach_II"	0.336
-"GummyBears_I"	"least"	"Grapefruit_I"	0.357
-"GummyBears_I"	"least"	"Onion_II"	0.368
-"GummyBears_I"	"least"	"Grapefruit_III"	0.373
-"GummyBears_I"	"least"	"Apples_II"	0.381
+"product"	"group"	"closest_by"	"similarity"	"graph_distance"	"frequency"
+"Tomatoes_I"	"most"	"Tomatoes_II"	0.954	0	3217
+"Tomatoes_I"	"most"	"Tomatoes_III"	0.946	0	3322
+"Tomatoes_I"	"most"	"Cola_II"	0.942	2	4141
+"Tomatoes_I"	"most"	"Cola_III"	0.933	2	4008
+"Tomatoes_I"	"most"	"Cola_I"	0.918	2	4067
+"Tomatoes_I"	"most"	"Peppers_III"	0.904	1	3805
+"Tomatoes_I"	"most"	"Lemonade_I"	0.897	3	5419
+"Tomatoes_I"	"most"	"Lemonade_III"	0.896	3	5178
+"Tomatoes_I"	"most"	"Lemonade_II"	0.894	3	5290
+"Tomatoes_I"	"most"	"Peppers_I"	0.887	1	3661
+"Tomatoes_I"	"least"	"Onion_I"	0.247	4	1251
+"Tomatoes_I"	"least"	"Onion_II"	0.248	4	1225
+"Tomatoes_I"	"least"	"Spinach_II"	0.257	5	1085
+"Tomatoes_I"	"least"	"ShoppingBag_I"	0.27	13	3515
+"Tomatoes_I"	"least"	"Spinach_I"	0.274	5	1159
+"Tomatoes_I"	"least"	"Onion_III"	0.282	4	1329
+"Tomatoes_I"	"least"	"Pringles_I"	0.283	13	5221
+"Tomatoes_I"	"least"	"ShoppingBag_II"	0.292	13	3555
+"Tomatoes_I"	"least"	"Spinach_III"	0.306	5	1128
+"Tomatoes_I"	"least"	"ShoppingBag_III"	0.31	13	3491
+"BitterLemon_II"	"most"	"BitterLemon_III"	0.975	0	3424
+"BitterLemon_II"	"most"	"BitterLemon_I"	0.937	0	3317
+"BitterLemon_II"	"most"	"Cassis_III"	0.925	1	3754
+"BitterLemon_II"	"most"	"Tea_III"	0.924	2	9211
+"BitterLemon_II"	"most"	"Tea_I"	0.912	2	9155
+"BitterLemon_II"	"most"	"Cassis_II"	0.911	1	3775
+"BitterLemon_II"	"most"	"Cassis_I"	0.907	1	3681
+"BitterLemon_II"	"most"	"Tea_II"	0.897	2	9149
+"BitterLemon_II"	"most"	"Zucchini_II"	0.889	1	3309
+"BitterLemon_II"	"most"	"Sodawater_II"	0.873	1	6581
+"BitterLemon_II"	"least"	"Pringles_I"	0.32	10	5221
+"BitterLemon_II"	"least"	"ShoppingBag_II"	0.333	10	3555
+"BitterLemon_II"	"least"	"ShoppingBag_I"	0.342	10	3515
+"BitterLemon_II"	"least"	"Twix_I"	0.367	10	5383
+"BitterLemon_II"	"least"	"Twix_III"	0.388	10	5319
+"BitterLemon_II"	"least"	"ShoppingBag_III"	0.39	10	3491
+"BitterLemon_II"	"least"	"Pringles_II"	0.422	10	5419
+"BitterLemon_II"	"least"	"Grapes_III"	0.427	8	2324
+"BitterLemon_II"	"least"	"Twix_II"	0.433	10	5332
+"BitterLemon_II"	"least"	"Pringles_III"	0.448	10	5187
+"Lime_II"	"most"	"Lime_I"	0.959	0	4443
+"Lime_II"	"most"	"Lime_III"	0.953	0	4436
+"Lime_II"	"most"	"Bananas_I"	0.951	2	5113
+"Lime_II"	"most"	"Bananas_II"	0.951	2	5159
+"Lime_II"	"most"	"Apples_III"	0.938	3	4767
+"Lime_II"	"most"	"Bananas_III"	0.923	2	5272
+"Lime_II"	"most"	"Strawberries_III"	0.921	2	8050
+"Lime_II"	"most"	"Grapefruit_II"	0.909	1	3377
+"Lime_II"	"most"	"Apples_I"	0.905	3	4811
+"Lime_II"	"most"	"Mangoes_III"	0.902	1	5077
+"Lime_II"	"least"	"ShoppingBag_II"	-0.003	18	3555
+"Lime_II"	"least"	"ShoppingBag_I"	0.028	18	3515
+"Lime_II"	"least"	"ShoppingBag_III"	0.049	18	3491
+"Lime_II"	"least"	"Pringles_I"	0.069	18	5221
+"Lime_II"	"least"	"Twix_I"	0.123	18	5383
+"Lime_II"	"least"	"Twix_III"	0.125	18	5319
+"Lime_II"	"least"	"Pringles_II"	0.187	18	5419
+"Lime_II"	"least"	"Snacks_II"	0.202	17	11297
+"Lime_II"	"least"	"Snacks_III"	0.204	17	11509
+"Lime_II"	"least"	"Spinach_II"	0.205	8	1085
+"MixedNuts_I"	"most"	"GummyBears_III"	0.945	1	9653
+"MixedNuts_I"	"most"	"MixedNuts_III"	0.942	0	9314
+"MixedNuts_I"	"most"	"GummyBears_I"	0.94	1	9674
+"MixedNuts_I"	"most"	"ChocolateBar_II"	0.939	3	10986
+"MixedNuts_I"	"most"	"Crackers_II"	0.939	2	10648
+"MixedNuts_I"	"most"	"GummyBears_II"	0.933	1	9623
+"MixedNuts_I"	"most"	"Crackers_III"	0.928	2	10708
+"MixedNuts_I"	"most"	"ChocolateBar_I"	0.926	3	10888
+"MixedNuts_I"	"most"	"ChewingGum_III"	0.921	4	11150
+"MixedNuts_I"	"most"	"ChewingGum_I"	0.915	4	11078
+"MixedNuts_I"	"least"	"Grapes_II"	0.218	16	2320
+"MixedNuts_I"	"least"	"Oranges_II"	0.241	16	2280
+"MixedNuts_I"	"least"	"Grapes_I"	0.247	16	2254
+"MixedNuts_I"	"least"	"Oranges_III"	0.255	16	2277
+"MixedNuts_I"	"least"	"Grapes_III"	0.257	16	2324
+"MixedNuts_I"	"least"	"Grapefruit_I"	0.285	17	3402
+"MixedNuts_I"	"least"	"Apples_II"	0.307	19	4787
+"MixedNuts_I"	"least"	"Spinach_II"	0.312	8	1085
+"MixedNuts_I"	"least"	"Onion_II"	0.316	9	1225
+"MixedNuts_I"	"least"	"Kiwi_III"	0.322	17	3280

@@ -79,26 +79,35 @@ load( 'out.01.emb/saved_glove.RData' )
 embedding <- glove <- vocab <- wv_context <- wv_main <- NULL
 
 
+# full symmetric weighted co-occurrence matrix (text2vec stores the upper triangle only)
+X <- as.matrix( tcm )
+X <- X + t( X ) - diag( diag( X ) )
+
+# row totals: X_i = sum_k X_ik (denominator of P(k|i))
+X_i <- rowSums( X )
+
 # container
 Ps <- NULL
 
-# get numbers of Table 1 & 2
+# get numbers of Table 3 & 4 (weighted co-occurrence counts X_ik and conditional probabilities P(k|i) = X_ik / X_i)
 #
 for( i in c( 'Oranges_I', 'Twix_I' ) )
 {
     for( j in c( 'Apples_I', 'Snickers_I', 'Cola_I', 'Lemonade_I', 'Peppers_I' ) )
     {
-        #print( tcm[ i, j ] )
-        val <- round( max( c( tcm[ i, j ], tcm[ j, i ] ) ), 0 )
-        
-        pr <- paste0( i, ' - ', j, ' - ', val )
-        Ps <- rbind( Ps, pr )
+        Ps <- rbind( Ps, data.frame( i = i, k = j, 
+                                     X_ik = round( X[ i, j ], 1 ), 
+                                     X_i = round( X_i[ i ], 1 ), 
+                                     P_k_given_i = signif( X[ i, j ] / X_i[ i ], 3 ) ) )
     }
 }
 
-# write data for Table 1 and 2 to disk
-write.csv( Ps, file = paste0( outdir, '/table_1_and_2_tcm_values.csv' ), quote = TRUE )
+# ratio P(k|Oranges) / P(k|Twix)
+Ps$ratio_oranges_twix <- NA
+Ps$ratio_oranges_twix[ Ps$i == 'Oranges_I' ] <- round( Ps$P_k_given_i[ Ps$i == 'Oranges_I' ] / Ps$P_k_given_i[ Ps$i == 'Twix_I' ], 2 )
 
+# write data for Table 3 and 4 to disk
+readr::write_tsv( Ps, file = paste0( outdir, '/table_3_and_4_cooccurrence.tsv' ) )
 
 # loop over other types to plot matrix
 for( type in c( 'I', 'II', 'III' ) )

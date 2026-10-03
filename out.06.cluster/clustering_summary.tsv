@@ -1,0 +1,5 @@
+set	n_items	best_k_silhouette	avg_silhouette_k4	ari_departments	ari_graph_partition	purity_departments	medoids	ari_graph_partition_vs_departments
+I	40	4	0.472	0.425	0.345	0.725	Cassis_I Watermelons_I Twix_I ChewingGum_I	0.545
+II	40	6	0.41	0.353	0.406	0.7	Onion_II Watermelons_II CaramelBars_II Snacks_II	0.545
+III	40	4	0.406	0.749	0.538	0.825	Onion_III Peppers_III Apples_III MixedNuts_III	0.545
+all	120	8	0.434	0.818	0.523	0.825	BitterLemon_II Tomatoes_I Lime_II MixedNuts_I	0.545

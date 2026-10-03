@@ -1,0 +1,14 @@
+Mean shortest-path distance between departments (shelves)
+           fruits vegetables beverages extras
+fruits       2.18       6.00      8.14  14.71
+vegetables   6.00       1.94      3.04   8.71
+beverages    8.14       3.04      1.96   6.57
+extras      14.71       8.71      6.57   3.10
+
+Number of walkable connections between departments
+            
+             fruits vegetables beverages extras
+  fruits         14          1         0      0
+  vegetables      1          9         6      0
+  beverages       0          6         7      1
+  extras          0          0         1     14

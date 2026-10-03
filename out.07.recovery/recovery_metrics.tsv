@@ -1,0 +1,8 @@
+representation	set	n_items	n_pairs	spearman_rho	neighbour_precision	neighbour_precision_chance	mantel_p
+GloVe embedding (50D)	I	40	780	0.786	0.577	0.067	0.001
+GloVe embedding (50D)	II	40	780	0.769	0.658	0.067	0.001
+GloVe embedding (50D)	III	40	780	0.785	0.652	0.067	0.001
+GloVe embedding (50D)	all	120	7140	0.791	0.607	0.067	0.001
+UMAP map (2D)	I	40	780	0.917	0.55	0.067	0.001
+UMAP map (2D)	II	40	780	0.941	0.683	0.067	0.001
+UMAP map (2D)	III	40	780	0.962	0.702	0.067	0.001
