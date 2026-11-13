@@ -7,7 +7,9 @@
 
 This repository contains the code, the generated corpus and all results for:
 
-> Otte WM, van Wieringen ALHM, Koet BJ. *Word embeddings from text corpora: a simulation study on the representation of underlying structures.* Submitted to PLOS ONE (PONE-D-26-11851), revised version 2026.
+> Otte WM, van Wieringen ALHM, Koet BJ (2026) *Word embeddings from text corpora: A simulation study on the representation of underlying structures.* PLoS One 21(11): e0362816. [https://doi.org/10.1371/journal.pone.0362816](https://doi.org/10.1371/journal.pone.0362816)
+
+The article is in press and will be available online shortly. The citation details above are taken from the proof PDF.
 
 ## Overview
 
@@ -114,11 +116,16 @@ The corpus itself is `out.00.sim/plain_text.txt.gz` (one sentence per line), and
 
 ```bibtex
 @article{otte2026embeddings,
-  title   = {Word embeddings from text corpora: a simulation study on the representation of underlying structures},
+  title   = {Word embeddings from text corpora: A simulation study on the representation of underlying structures},
   author  = {Otte, Willem M. and van Wieringen, Archibald L. H. M. and Koet, Bart J.},
   journal = {PLOS ONE},
   year    = {2026},
-  note    = {Under revision (PONE-D-26-11851)}
+  volume  = {21},
+  number  = {11},
+  pages   = {e0362816},
+  doi     = {10.1371/journal.pone.0362816},
+  url     = {https://doi.org/10.1371/journal.pone.0362816},
+  note    = {In press}
 }
 ```
 
